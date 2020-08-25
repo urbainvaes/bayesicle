@@ -164,8 +164,9 @@ class CboSolver(CbSolver):
 
         if ip.eq_constraint is not None:
             for i, _ in enumerate(new_ensembles):
+                print("here")
                 new_ensembles[i] -= self.dt*(1/self.eq_constraint_eps) \
-                                * ip.eq_constraint(ensembles[i]) \
+                                * max(ip.eq_constraint(ensembles[i]), 0) \
                                 * ip.eq_constraint_grad(ensembles[i])
 
         data = CboIterationData(

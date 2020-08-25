@@ -56,10 +56,10 @@ plotter = m.Plotter(m.ip)
 
 for i in range(n_iter):
     print("Iteration {:04d}".format(i))
-    data = solver_eks.step(m.ip, ensembles,
+    data = solver_cbs.step(m.ip, ensembles,
                            filename="iteration-{:04d}.npy".format(i))
     ensembles = data.new_ensembles
     plotter.kernel_plot(i, data._asdict())
-    if i % 50 == 0:
+    if i % 1 == 0:
         plt.pause(1)
         plt.draw()

@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 
 # Forward model and solver
 # import model_elliptic_2d as m
-# import model_simple_3d as m
+import model_simple_3d as m
 import model_elliptic_1d as m
 
 import solver_cbs
@@ -20,11 +20,11 @@ np.random.seed(0)
 # plotter = m.MainModesPlotter(m.ip, show_weights=True)
 plotter = m.Plotter()
 
-# solver = solver_cbs.CbsSolver(
-#     dt=np.inf,
-#     parallel=True,
-#     adaptive=True,
-#     dirname=m.__name__)
+solver = solver_cbs.CbsSolver(
+    dt=np.inf,
+    parallel=True,
+    adaptive=True,
+    dirname=m.__name__)
 
 # solver = solver_eks.EksSolver(
 #     dt=1,
@@ -34,13 +34,13 @@ plotter = m.Plotter()
 #     adaptive=True,
 #     dirname=m.__name__)
 
-solver = solver_md.MdSolver(
-    delta=.001, sigma=.001,
-    dt=.05, reg=False, noise=False,
-    parallel=True,
-    adaptive=True,
-    dt_min=1e-10,
-    dirname=m.__name__)
+# solver = solver_md.MdSolver(
+#     delta=.001, sigma=.001,
+#     dt=.05, reg=False, noise=False,
+#     parallel=True,
+#     adaptive=True,
+#     dt_min=1e-10,
+#     dirname=m.__name__)
 
 
 # Number of particles
