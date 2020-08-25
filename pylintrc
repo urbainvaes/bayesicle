@@ -1,0 +1,9 @@
+[MESSAGES CONTROL]
+# Variable doesn't conform to snake_case convention
+#
+# Missing class docstring
+# Missing function docstring
+# disable=C0103,C0105,C0115,C0116
+disable=C0103,C0115,C0116
+
+# vim: ft=config
