@@ -19,7 +19,8 @@ d, K = 3, 3
 # Forward model
 def forward(u):
     # return np.array([u[0], 10*u[1], 100*u[2], u[3], 10*u[4], 100*u[5]])
-    return np.array([u[0], 10*u[1], 100*u[2]])
+    # return np.array([u[0], 10*u[1], 100*u[2]])
+    return np.array([u[0], u[1], u[2]])
 
 
 # Covariance of noise and prior

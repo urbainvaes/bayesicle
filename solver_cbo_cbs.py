@@ -90,7 +90,7 @@ CbsIterationData = collections.namedtuple(
 class CbsSolver(CbSolver):
 
     def __init__(self, **opts):
-        super().__init__(frac_min=1/5, frac_max=1/2, **opts)
+        super().__init__(**opts)
         self.opti = opts.get('opti', False)
         self.reg = opts.get('reg', True)
 
@@ -148,7 +148,7 @@ class CboSolver(CbSolver):
         self.sigma = opts.get('sigma', 1)
 
         # Constraint
-        self.eq_constraint_eps = opts.get('epsilon', .1)
+        self.constraint_eps = opts.get('epsilon', .1)
 
     def step(self, ip, ensembles, filename=None):
         J = ensembles.shape[0]
@@ -164,10 +164,15 @@ class CboSolver(CbSolver):
 
         if ip.eq_constraint is not None:
             for i, _ in enumerate(new_ensembles):
-                print("here")
-                new_ensembles[i] -= self.dt*(1/self.eq_constraint_eps) \
-                                * max(ip.eq_constraint(ensembles[i]), 0) \
+                new_ensembles[i] -= self.dt*(1/self.constraint_eps) \
+                                * ip.eq_constraint(ensembles[i]) \
                                 * ip.eq_constraint_grad(ensembles[i])
+
+        if ip.ineq_constraint is not None:
+            for i, _ in enumerate(new_ensembles):
+                new_ensembles[i] -= self.dt*(1/self.constraint_eps) \
+                                * max(ip.ineq_constraint(ensembles[i]), 0) \
+                                * ip.ineq_constraint_grad(ensembles[i])
 
         data = CboIterationData(
             solver='cbs', ensembles=ensembles, f_ensembles=f_ensembles,

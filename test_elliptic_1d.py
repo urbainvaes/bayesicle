@@ -12,11 +12,13 @@ np.random.seed(0)
 # Preconditioning
 
 solver_cbs = solvers.CbsSolver(
-    dt=np.inf,
+    dt=1,
+    frac_min=50/100,
+    frac_max=55/100,
     parallel=True,
     adaptive=True,
     dirname=m.__name__,
-    opti=True)
+    opti=False)
 
 solver_cbo = solvers.CboSolver(
     dt=.1,
@@ -38,15 +40,19 @@ solver_eks = solvers.EksSolver(
 # Number of particles
 J = 1000
 
-ensembles_x = .1*np.random.randn(J)
-ensembles_y = 90 + 5*np.random.rand(J)
+# ensembles_x = np.random.randn(J)
+# ensembles_y = 90 + 20*np.random.rand(J)
+# ensembles_x = -2.72 + .005*np.random.randn(J)
+# ensembles_y = 104.3 + .05*np.random.randn(J)
+ensembles_x = .005*np.random.randn(J)
+ensembles_y = 90 + .05*np.random.randn(J)
 ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 
 # plotter = m.AllCoeffsPlotter(m.ip, show_weights=True)
 # plotter = m.MainModesPlotter(m.ip, show_weights=True)
 plotter = m.Plotter(m.ip, show_weights=True, cutoff=500,
-                    contours=False)
+                    contours=True)
 
 n_iter_precond = 1000
 for i in range(n_iter_precond):

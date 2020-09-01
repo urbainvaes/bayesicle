@@ -35,7 +35,7 @@ class EksSolver:
         os.makedirs(self.data_dir, exist_ok=True)
 
         # Constraint
-        self.eq_constraint_eps = opts.get('epsilon', .1)
+        self.constraint_eps = opts.get('epsilon', .1)
 
     def g_ensembles(self, ip, ensembles):
         # Strange but seemingly necessary to avoid pickling issue? \_(")_/
@@ -115,9 +115,16 @@ class EksSolver:
 
         if ip.eq_constraint is not None:
             for i, _ in enumerate(drifts):
-                drifts[i] += (1/self.eq_constraint_eps) \
+                drifts[i] += (1/self.constraint_eps) \
                               * ip.eq_constraint(ensembles[i]) \
                               * ip.eq_constraint_grad(ensembles[i])
+
+        if ip.ineq_constraint is not None:
+            for i, _ in enumerate(drifts):
+                drifts[i] += (1/self.constraint_eps) \
+                              * ip.ineq_constraint(ensembles[i]) \
+                              * max(ip.ineq_constraint(ensembles[i]), 0) \
+                              * ip.ineq_constraint_grad(ensembles[i])
 
         my_dt = self.dt
         if self.adaptive:

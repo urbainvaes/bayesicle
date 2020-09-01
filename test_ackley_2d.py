@@ -18,7 +18,7 @@ solver_cbs = solvers.CbsSolver(
     opti=False)
 
 solver_cbo = solvers.CboSolver(
-    dt=.01,
+    dt=.001,
     parallel=True,
     adaptive=True,
     beta=100,
@@ -29,7 +29,7 @@ solver_cbo = solvers.CboSolver(
 
 solver_eks = solvers.EksSolver(
     dt=.1,
-    dt_max=0.05,
+    dt_max=10,
     reg=True,
     noise=False,
     parallel=True,
@@ -42,8 +42,8 @@ J = 1000
 
 ensembles_x = 0 + 3*np.random.randn(J)
 ensembles_y = 0 + 3*np.random.randn(J)
-# ensembles_x = 0 + .5*np.random.randn(J)
-# ensembles_y = 0 + .5*np.random.randn(J)
+ensembles_x = 0 + .5*np.random.randn(J)
+ensembles_y = 0 + .5*np.random.randn(J)
 ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 
@@ -52,10 +52,10 @@ ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 # Plots
 plotter = m.Plotter(m.ip, show_weights=True, cutoff=500,
-                    contour=True, Lx_contours=2, Ly_contours=2)
+                    contour=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=5)
 
-# solver, plot_step = solver_cbo, 50
-solver, plot_step = solver_cbs, 1
+# solver, plot_step = solver_eks, 50
+solver, plot_step = solver_cbo, 50
 
 # Main loop
 n_iter = 100000

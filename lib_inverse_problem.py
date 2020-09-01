@@ -30,6 +30,8 @@ class InverseProblem:
 
         self.eq_constraint = constraints.get('eq_constraint', None)
         self.eq_constraint_grad = constraints.get('eq_constraint_grad', None)
+        self.ineq_constraint = constraints.get('ineq_constraint', None)
+        self.ineq_constraint_grad = constraints.get('ineq_constraint_grad', None)
 
     def reg_least_squares(self, u):
         diff = self.forward(u) - self.y

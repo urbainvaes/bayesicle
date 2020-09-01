@@ -3,7 +3,7 @@ import scipy.stats
 import matplotlib
 import matplotlib.pyplot as plt
 
-cmap = 'jet'
+cmap = 'spring'
 matplotlib.rc('image', cmap=cmap)
 
 
@@ -112,7 +112,7 @@ class MainModesPlotter:
 class TwoDimPlotter:
     def __init__(self, ip, **config):
         self.fig, self.ax = plt.subplots()
-        n_grid = 400
+        n_grid = 200
         self.argmin, _ = ip.map_estimator()
         # Width for plot of posterior
         self.Lx = config.get('Lx', 1.5)
@@ -130,7 +130,15 @@ class TwoDimPlotter:
             y_plot = self.argmin[1] + Ly_contour*np.linspace(-1, 1, n_grid)
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = (1/ip.normalization()) * ip.posterior(X, Y)
-            self.ax.contour(X, Y, -np.log(Z), levels=50)
+            self.ax.contourf(X, Y, -np.log(Z), levels=50, cmap='jet')
+            constraint = None
+            if ip.eq_constraint is not None:
+                constraint = ip.eq_constraint
+            elif ip.ineq_constraint is not None:
+                constraint = ip.ineq_constraint
+            if constraint is not None:
+                Z = constraint((X, Y))
+                self.ax.contour(X, Y, Z, levels=[0])
         self.scatter = self.ax.scatter([], [], cmap=cmap)
         self.config = config
 
@@ -157,6 +165,7 @@ class TwoDimPlotter:
         delta_x, delta_y = xmax - xmin, ymax - ymin
         self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
         self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
+        print(ymin - .1*delta_y, ymax + .1*delta_y)
         if data['solver'] == 'cbs' and self.config.get('show_weights', True):
             title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
                      .format(data['beta'], data['ess'])
