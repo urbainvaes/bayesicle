@@ -10,7 +10,9 @@ np.random.seed(0)
 
 # Preconditioning
 solver_cbs = solvers.CbsSolver(
-    dt=1,
+    dt=np.inf,
+    frac_min=5/100,
+    frac_max=10/100,
     parallel=True,
     adaptive=True,
     dirname=m.__name__,
@@ -45,7 +47,7 @@ solver_md = solvers.MdSolver(
     dirname=m.__name__)
 
 # Initial ensembles
-J = 1000
+J = 10000
 ensembles = np.random.rand(J, 1)
 
 n_iter = 1000
@@ -59,7 +61,7 @@ for i in range(n_iter):
     data = solver_cbs.step(m.ip, ensembles,
                            filename="iteration-{:04d}.npy".format(i))
     ensembles = data.new_ensembles
-    plotter.kernel_plot(i, data._asdict())
+    plotter.plot(i, data._asdict())
     if i % 1 == 0:
         plt.pause(1)
         plt.draw()

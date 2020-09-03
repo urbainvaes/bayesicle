@@ -112,7 +112,7 @@ class MainModesPlotter:
 class TwoDimPlotter:
     def __init__(self, ip, **config):
         self.fig, self.ax = plt.subplots()
-        n_grid = 200
+        n_grid = 800
         self.argmin, _ = ip.map_estimator()
         # Width for plot of posterior
         self.Lx = config.get('Lx', 1.5)
@@ -125,12 +125,12 @@ class TwoDimPlotter:
         self.ax.contourf(X, Y, Z, levels=100, cmap=cmap_posterior)
         if config.get('contours', True):
             Lx_contour = config.get('Lx_contours', 1)
-            Ly_contour = config.get('Lx_contours', 1)
+            Ly_contour = config.get('Ly_contours', 1)
             x_plot = self.argmin[0] + Lx_contour*np.linspace(-1, 1, n_grid)
             y_plot = self.argmin[1] + Ly_contour*np.linspace(-1, 1, n_grid)
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = (1/ip.normalization()) * ip.posterior(X, Y)
-            self.ax.contourf(X, Y, -np.log(Z), levels=50, cmap='jet')
+            self.ax.contour(X, Y, -np.log(Z), levels=50, cmap='jet')
             constraint = None
             if ip.eq_constraint is not None:
                 constraint = ip.eq_constraint
@@ -186,12 +186,13 @@ class OneDimPlotter(object):
     def __init__(self, ip):
         self.fig, self.ax = plt.subplots()
         n_grid = 400
-        x_plot = ip.unknown + 1*np.linspace(-1, 1, n_grid)
+        x_plot = 6*np.linspace(-1, 1, n_grid)
         posterior = (1/ip.normalization()) * ip.posterior(x_plot)
         self.ax.plot(x_plot, posterior, label="Posterior")
-        self.ax.plot(x_plot, -np.log(posterior), label=r"$\Phi_R$")
-        self.my_plot = self.ax.plot(x_plot, 0*x_plot, label="CBS")[0]
+        # self.ax.plot(x_plot, -np.log(posterior), label=r"$\Phi_R$")
+        self.my_plot = self.ax.plot(x_plot, 0*x_plot, ".-", label="CBS")[0]
         self.x_plot = x_plot
+        self.ax.set_ylim(0, 2)
         plt.legend()
 
     def plot(self, iteration, data):
@@ -199,7 +200,8 @@ class OneDimPlotter(object):
         x_particles = ens.T[0]
         x_particles = np.sort(x_particles)
         mean, cov = np.mean(x_particles), np.cov(x_particles)
-        x_plot = self.x_plot
+        # x_plot = self.x_plot
+        x_plot = x_particles
         self.my_plot.set_data(x_plot, 1/np.sqrt(2*np.pi*cov) *
                               np.exp(-(x_plot - mean)**2/(2*cov)))
 
