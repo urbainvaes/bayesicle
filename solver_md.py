@@ -15,16 +15,17 @@ default_settings = {
         'dirname': 'test',
         }
 
-
 MdIterationData = collections.namedtuple(
     'MdIterationData', [
         'solver', 'theta', 'xis', 'delta', 'sigma', 'dt',
-        'new_theta', 'new_xis', 'value_func'])
+        'new_theta', 'new_xis', 'value_func', 'all_thetas'])
+
 
 
 class MdSolver:
 
     def __init__(self, **opts):
+        self.J = opts['J']
         self.delta = opts['delta']
         self.sigma = opts['sigma']
         self.dt = opts['dt']
@@ -68,13 +69,24 @@ class MdSolver:
             g_ensembles = np.array([forward(u) for u in ensembles])
         return g_ensembles
 
-    def step(self, ip, theta, xis, filename=None):
+    def step(self, ip, data, filename=None):
+        if isinstance(iterand, MdIterationData):
+            theta = data.theta
+            xis = data.xis
+            all_thetas = data.all_thetas
+        elif isinstance(iterand, np.ndarray):
+            theta = iterand
+            xis = np.random.randn(self.J, ip.d)
+            all_thetas = np.reshape(theta, (1, ip.d))
+        else:
+            print("Invalid argument!")
+            raise TypeError
 
         # Preconditioning
         unmapped_theta = theta
         theta = self.precond_map(theta)
 
-        J, dim_u = xis.shape
+        J, dim_u = self.J, ip.d
         g_theta = ip.forward(unmapped_theta)
 
         func = ip.reg_least_squares if self.reg else ip.least_squares
@@ -117,10 +129,25 @@ class MdSolver:
         data = MdIterationData(
             solver='md', theta=unmapped_theta, xis=xis, delta=self.delta,
             sigma=self.sigma, dt=my_dt, new_theta=unmapped_new_theta,
-            new_xis=new_xis, value_func=value_func)
+            new_xis=new_xis, value_func=value_func, )
 
         if filename is not None:
             np.save("{}/{}".format(self.data_dir, filename),
                     data._asdict())
 
         return data
+
+
+class MdSimulation():
+
+    def init(self, ip, label, initial, **opts):
+        self.ip = ip
+        self.label = label
+        self.theta = initial
+
+        self.all_thetas = np.reshape(initial, (1, ip.d))
+        self.iteration = 0
+        self.solver = MdSolver(**opts)
+
+    def step(self):
+        self.step(m.ip, data, filename="iteration-{:04d}.npy".format(i))
