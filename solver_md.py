@@ -18,7 +18,7 @@ default_settings = {
 MdIterationData = collections.namedtuple(
     'MdIterationData', [
         'solver', 'theta', 'xis', 'delta', 'sigma', 'dt',
-        'new_theta', 'new_xis', 'value_func', 'all_thetas'])
+        'new_theta', 'new_xis', 'value_func'])
 
 
 
@@ -69,18 +69,7 @@ class MdSolver:
             g_ensembles = np.array([forward(u) for u in ensembles])
         return g_ensembles
 
-    def step(self, ip, data, filename=None):
-        if isinstance(iterand, MdIterationData):
-            theta = data.theta
-            xis = data.xis
-            all_thetas = data.all_thetas
-        elif isinstance(iterand, np.ndarray):
-            theta = iterand
-            xis = np.random.randn(self.J, ip.d)
-            all_thetas = np.reshape(theta, (1, ip.d))
-        else:
-            print("Invalid argument!")
-            raise TypeError
+    def step(self, ip, theta, xis, filename=None):
 
         # Preconditioning
         unmapped_theta = theta
@@ -138,16 +127,37 @@ class MdSolver:
         return data
 
 
-class MdSimulation():
+class MdSimulation:
 
-    def init(self, ip, label, initial, **opts):
+    def __init__(self, ip, initial, solver, save_step=50):
         self.ip = ip
-        self.label = label
         self.theta = initial
+        self.solver = solver
+        self.save_step = save_step
 
-        self.all_thetas = np.reshape(initial, (1, ip.d))
+        self.xis = np.random.randn(solver.J, ip.d)
+        self.all_thetas = []
+        self.all_fthetas = []
         self.iteration = 0
-        self.solver = MdSolver(**opts)
 
     def step(self):
-        self.step(m.ip, data, filename="iteration-{:04d}.npy".format(i))
+        data = self.solver.step(self.ip, self.theta, self.xis,
+                                filename="iteration-{:04d}.npy".format(self.iteration))
+        self.iteration += 1
+        self.all_thetas.append(data.theta)
+        self.all_fthetas.append(data.value_func)
+        self.theta = data.new_theta
+        self.xis = data.new_xis
+
+        plot_step = 50
+        if self.iteration % self.save_step == 0:
+            filename="simulation-iteration-{:04d}.npy".format(self.iteration)
+            np.save("{}/{}".format(self.solver.data_dir, filename),
+                    self.get_data())
+
+        return data
+
+    def get_data(self):
+        all_thetas = np.asarray(self.all_thetas).reshape(self.iteration, self.ip.d)
+        all_fthetas = np.asarray(self.all_thetas).reshape(self.iteration, self.ip.d)
+        return {'solver': 'md', 'ensembles': all_thetas, 'f_ensembles': all_fthetas}

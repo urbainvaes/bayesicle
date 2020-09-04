@@ -36,6 +36,12 @@ solver_eks = solvers.EksSolver(
     adaptive=True,
     dirname=m.__name__)
 
+# Plots
+plotter = m.Plotter(m.ip, show_weights=True,
+                    contours=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=40)
+import ipdb; ipdb.set_trace()
+
+# Preconditioning
 use_precond = False
 
 if use_precond:
@@ -47,16 +53,13 @@ if use_precond:
     ensembles_y = 90 + 20*np.random.rand(J)
     ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
-    plotter = m.Plotter(m.ip, show_weights=True, cutoff=500,
-                        contours=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=40)
-
     n_iter_precond = 500
     for i in range(n_iter_precond):
-        data = solver_cbs.step(m.ip, ensembles,
+        data = solver_eks.step(m.ip, ensembles,
                                filename="iteration-{:04d}.npy".format(i))
         ensembles = data.new_ensembles
         plotter.plot(i, data._asdict())
-        if i % 1 == 0:
+        if i % 50 == 0:
             plt.pause(1)
             plt.draw()
     precond_vec = np.mean(ensembles, axis=0)
@@ -66,29 +69,33 @@ else:
     precond_vec = np.array([1, 1])
     precond_mat = np.eye(len(precond_vec))
 
-solver_md = solvers.MdSolver(
-    J=3,
-    delta=.001,
-    sigma=.001,
-    reg=True,
-    noise=True,
-    parallel=True,
-    adaptive=False,
-    dt=.1,
-    dt_min=1e-7,
-    dt_max=1,
-    precond_vec=precond_vec,
-    precond_mat=precond_mat,
-    dirname=m.__name__)
+params1 = {'J': 8, 'delta': 1e-7, 'sigma': 1, 'noise': False, 'dirname': m.__name__ + "-1"}
+params = [params1]
 
-# Initial parameters
-data = np.mean(ensembles, axis=0)
+for p in params:
 
-n_iter = 50000
-for i in range(n_iter):
-    data = solver_md.step(m.ip, data, filename="iteration-{:04d}.npy".format(i))
-    print("Reg least squares {}".format(data.value_func))
-    if i % 100 == 0:
-        plotter.plot(i, data)
-        plt.pause(1)
-        plt.draw()
+    solver_md = solvers.MdSolver(
+        **p,
+        reg=True,
+        parallel=True,
+        adaptive=False,
+        dt=.001,
+        precond_vec=precond_vec,
+        precond_mat=precond_mat)
+
+    # Initial parameters
+    theta = np.array([1, 103])
+
+    simulation = solvers.MdSimulation(
+            ip=m.ip,
+            initial=theta,
+            solver=solver_md)
+
+    n_iter = 1100
+    for i in range(n_iter):
+        if i % 50 == 0 and i > 0:
+            plotter.plot(simulation.iteration, simulation.get_data())
+            plt.pause(.1)
+            plt.draw()
+        data = simulation.step()
+        print("Reg least squares {}".format(data.value_func))
