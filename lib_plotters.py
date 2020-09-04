@@ -129,8 +129,8 @@ class TwoDimPlotter:
             x_plot = self.argmin[0] + Lx_contour*np.linspace(-1, 1, n_grid)
             y_plot = self.argmin[1] + Ly_contour*np.linspace(-1, 1, n_grid)
             X, Y = np.meshgrid(x_plot, y_plot)
-            Z = (1/ip.normalization()) * ip.posterior(X, Y)
-            self.ax.contour(X, Y, -np.log(Z), levels=50, cmap='jet')
+            Z = ip.least_squares_array(X, Y)
+            self.ax.contour(X, Y, Z, levels=50, cmap='viridis')
             constraint = None
             if ip.eq_constraint is not None:
                 constraint = ip.eq_constraint
@@ -140,6 +140,7 @@ class TwoDimPlotter:
                 Z = constraint((X, Y))
                 self.ax.contour(X, Y, Z, levels=[0])
         self.scatter = self.ax.scatter([], [], cmap=cmap)
+        self.my_plot = self.ax.plot([], [], 'k')
         self.config = config
 
         # Text on plot
@@ -153,9 +154,11 @@ class TwoDimPlotter:
         title = "Iteration {}".format(iteration)
         ensembles = data['ensembles']
         if data['solver'] == 'md':
-            cutoff = self.config.get('cutoff', 200)
+            cutoff = self.config.get('cutoff', 10**10)
             if cutoff < len(ensembles):
                 ensembles = data['ensembles'][-cutoff:]
+        if len(ensembles) == 0:
+            return
         self.scatter.set_offsets(ensembles)
         x_plot, y_plot = ensembles[:, 0], ensembles[:, 1]
         xmin = min(self.argmin[0] - self.Lx, np.min(x_plot))
@@ -177,6 +180,7 @@ class TwoDimPlotter:
             n = len(ensembles)
             self.scatter.set_array(np.arange(n)/n)
             self.scatter.set_clim((0, 1))
+            self.my_plot[0].set_data(ensembles[:, 0], ensembles[:, 1])
         self.ax.set_title(title)
         set_text(iteration, data, self.text)
 

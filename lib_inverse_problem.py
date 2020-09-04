@@ -38,15 +38,25 @@ class InverseProblem:
         return (1/2)*diff.dot(self.inv_Γ.dot(diff)) \
             + (1/2)*u.dot(self.inv_Σ.dot(u))
 
-    def least_squares(self, u):
-        diff = self.forward(u) - self.y
-        return (1/2)*diff.dot(self.inv_Γ.dot(diff))
-
     def map_estimator(self):
         if self.argmin is None:
             self.argmin, self.fmin = direct_min(self.reg_least_squares,
                                                 np.zeros(self.d))
         return self.argmin, self.fmin
+
+    def least_squares(self, u):
+        diff = self.forward(u) - self.y
+        return (1/2)*diff.dot(self.inv_Γ.dot(diff))
+
+    def least_squares_array(self, *args):
+        if isinstance(args[0], float):
+            args = tuple(np.array([a]) for a in args)
+        shape = args[0].shape
+        args = tuple(a.reshape(np.prod(shape)) for a in args)
+        xs = np.vstack(args).T
+        f = self.reg_least_squares
+        result = np.array([np.exp(-(f(x))) for x in xs])
+        return result.reshape(shape)
 
     def posterior(self, *args):
         argmin, fmin = self.map_estimator()
