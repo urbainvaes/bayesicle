@@ -55,7 +55,7 @@ class InverseProblem:
         args = tuple(a.reshape(np.prod(shape)) for a in args)
         xs = np.vstack(args).T
         f = self.reg_least_squares
-        result = np.array([np.exp(-(f(x))) for x in xs])
+        result = np.array([f(x) for x in xs])
         return result.reshape(shape)
 
     def posterior(self, *args):

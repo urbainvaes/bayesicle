@@ -130,7 +130,7 @@ class TwoDimPlotter:
             y_plot = self.argmin[1] + Ly_contour*np.linspace(-1, 1, n_grid)
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = ip.least_squares_array(X, Y)
-            self.ax.contour(X, Y, Z, levels=50, cmap='viridis')
+            self.ax.contour(X, Y, -np.log(Z), levels=100, cmap='viridis')
             constraint = None
             if ip.eq_constraint is not None:
                 constraint = ip.eq_constraint

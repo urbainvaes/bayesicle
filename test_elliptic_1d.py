@@ -39,7 +39,6 @@ solver_eks = solvers.EksSolver(
 # Plots
 plotter = m.Plotter(m.ip, show_weights=True,
                     contours=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=40)
-import ipdb; ipdb.set_trace()
 
 # Preconditioning
 use_precond = False
@@ -70,7 +69,9 @@ else:
     precond_mat = np.eye(len(precond_vec))
 
 params1 = {'J': 8, 'delta': 1e-7, 'sigma': 1, 'noise': False, 'dirname': m.__name__ + "-1"}
-params = [params1]
+params2 = {'J': 8, 'delta': 1e-7, 'sigma': .1, 'noise': False, 'dirname': m.__name__ + "-2"}
+params2 = {'J': 8, 'delta': 1e-7, 'sigma': .01, 'noise': False, 'dirname': m.__name__ + "-3"}
+params = [params2]
 
 for p in params:
 
