@@ -6,9 +6,6 @@ import scipy.linalg as la
 import model_elliptic_1d as m
 import solvers
 
-# Set seed to zero
-np.random.seed(0)
-
 # Solvers
 solver_cbs = solvers.CbsSolver(
     dt=1,
@@ -68,12 +65,16 @@ else:
     precond_vec = np.array([1, 1])
     precond_mat = np.eye(len(precond_vec))
 
-params1 = {'J': 8, 'delta': 1e-7, 'sigma': 1, 'noise': False, 'dirname': m.__name__ + "-1"}
-params2 = {'J': 8, 'delta': 1e-7, 'sigma': .1, 'noise': False, 'dirname': m.__name__ + "-2"}
-params2 = {'J': 8, 'delta': 1e-7, 'sigma': .01, 'noise': False, 'dirname': m.__name__ + "-3"}
-params = [params2]
+params1 = {'J': 100, 'delta': 1e-7, 'sigma': .001, 'noise': False, 'dirname': m.__name__ + "-1"}
+params2 = {'J': 100, 'delta': 1e-7, 'sigma': .1, 'noise': False, 'dirname': m.__name__ + "-2"}
+params3 = {'J': 100, 'delta': 1e-7, 'sigma': .5, 'noise': False, 'dirname': m.__name__ + "-3"}
+params4 = {'J': 100, 'delta': 1e-7, 'sigma': 1, 'noise': False, 'dirname': m.__name__ + "-4"}
+params = [params1, params2, params3, params4]
 
 for p in params:
+
+    # Reset seed
+    np.random.seed(0)
 
     solver_md = solvers.MdSolver(
         **p,
