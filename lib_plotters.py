@@ -70,7 +70,7 @@ class MainModesPlotter:
         self.ax[1].plot(self.u[c1], self.u[c2], 'kx', ms=20, mew=5)
         self.ax[0].set_xlabel(r'$u_{}$'.format(c0))
         self.ax[0].set_ylabel(r'$u_{}$'.format(c1))
-        self.ax[1].set_xlabel(r'$u_{}$'.format(c0))
+        self.ax[1].set_xlabel(r'$u_{}$'.format(c1))
         self.ax[1].set_ylabel(r'$u_{}$'.format(c2))
         scatter_1 = self.ax[0].scatter([], [], s=15, cmap=cmap)
         scatter_2 = self.ax[1].scatter([], [], s=15, cmap=cmap)

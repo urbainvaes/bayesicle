@@ -21,7 +21,7 @@ plotter = m.MainModesPlotter(m.ip, show_weights=True, cutoff=10000,
 precond_vec = np.zeros(m.ip.d)
 precond_mat = np.eye(m.ip.d)
 
-preconditioning = True
+preconditioning = False
 if preconditioning:
 
     precond_vec_file = lib_misc.data_root + "/precond_vec.npy"
@@ -64,23 +64,22 @@ if preconditioning:
         np.save(precond_vec_file, precond_vec)
         np.save(precond_mat_file, precond_mat)
 
-import ipdb; ipdb.set_trace()
-
 # MULTISCALE METHOD {{{1
 # Test MD solver
 solver_md = solvers.MdSolver(
     J=8,
     delta=1e-5,
     sigma=1e-5,
-    dt=1e-4,
+    dt=(1 if preconditioning else 1/m.k**4),
     reg=False,
     noise=False,
     parallel=True,
     adaptive=False,
     dt_min=1e-7,
+    dt_max=.1,
     precond_vec=precond_vec,
     precond_mat=precond_mat,
-    dirname=m.__name__)
+    dirname=m.__name__ + ("-precond" if preconditioning else "-noprecond"))
 
 # Initial parameters
 theta = np.zeros(m.ip.d)
@@ -90,7 +89,7 @@ simulation = solvers.MdSimulation(
         initial=theta,
         solver=solver_md)
 
-n_iter = 50000
+n_iter = (200 if preconditioning else 4000)
 for i in range(n_iter):
     if i % 100 == 0:
         plotter.plot(i, simulation.get_data())
