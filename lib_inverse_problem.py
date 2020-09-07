@@ -84,3 +84,26 @@ class InverseProblem:
             self.Z_normal = integ.dblquad(lambda y, x: self.posterior(x, y),
                                           xmin, xmax, ymin, ymax)[0]
         return self.Z_normal
+
+    def moments_posterior(self):
+        if self.d == 2:
+            argmin, _ = self.map_estimator()
+
+            Lx, Ly = 2, 2
+            xmin, xmax = self.argmin[0] - Lx, self.argmin[0] + Lx
+            ymin, ymax = self.argmin[1] - Ly, self.argmin[1] + Ly
+
+            def integ_fun(f):
+               result = integ.dblquad(lambda y, x: f(x, y) * self.posterior(x, y),
+                                      xmin, xmax, ymin, ymax)[0]
+               return result / self.normalization()
+
+            mx = integ_fun(lambda x, y: x)
+            my = integ_fun(lambda x, y: y)
+            mxx = integ_fun(lambda x, y: (x-mx)*(x-mx))
+            myy = integ_fun(lambda x, y: (y-my)*(y-my))
+            mxy = integ_fun(lambda x, y: (x-mx)*(y-my))
+
+            m = np.array([mx, my])
+            c = np.array([[mxx, mxy], [mxy, myy]])
+            return m, c
