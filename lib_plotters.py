@@ -67,7 +67,7 @@ class MainModesPlotter:
         c0, c1, c2 = self.coeffs
         self.fig, self.ax = plt.subplots(1, 2)
         self.ax[0].plot(self.u[c0], self.u[c1], 'kx', ms=20, mew=5)
-        self.ax[1].plot(self.u[c0], self.u[c2], 'kx', ms=20, mew=5)
+        self.ax[1].plot(self.u[c1], self.u[c2], 'kx', ms=20, mew=5)
         self.ax[0].set_xlabel(r'$u_{}$'.format(c0))
         self.ax[0].set_ylabel(r'$u_{}$'.format(c1))
         self.ax[1].set_xlabel(r'$u_{}$'.format(c0))
@@ -83,12 +83,22 @@ class MainModesPlotter:
             .03, .98, "Ready", fontsize=18, bbox=props,
             horizontalalignment='left', verticalalignment='top',
             transform=ax_text.transAxes)
+        self.config = config
 
     def plot(self, iteration, data):
 
+        ensembles = data['ensembles']
+        if data['solver'] == 'md':
+            cutoff = self.config.get('cutoff', 10**10)
+            if cutoff < len(ensembles):
+                ensembles = ensembles[-cutoff:]
+
+        if len(data['ensembles']) == 0:
+            return
+
         def update_scatter(an_ax, scatter, i1, i2):
-            scatter.set_offsets(data['ensembles'][:, [i1, i2]])
-            x_plot, y_plot = data['ensembles'][:, i1], data['ensembles'][:, i2]
+            scatter.set_offsets(ensembles[:, [i1, i2]])
+            x_plot, y_plot = ensembles[:, i1], ensembles[:, i2]
             xmin = min(self.u[i1], np.min(x_plot))
             xmax = max(self.u[i1], np.max(x_plot))
             ymin = min(self.u[i2], np.min(y_plot))
@@ -105,7 +115,7 @@ class MainModesPlotter:
 
         coeff_0, coeff_1, coeff_2 = self.coeffs
         update_scatter(self.ax[0], self.scatters[0], coeff_0, coeff_1)
-        update_scatter(self.ax[1], self.scatters[1], coeff_0, coeff_2)
+        update_scatter(self.ax[1], self.scatters[1], coeff_1, coeff_2)
         set_text(iteration, data, self.text)
 
 
