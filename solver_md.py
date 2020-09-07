@@ -146,6 +146,7 @@ class MdSimulation:
         self.iteration += 1
         self.all_thetas.append(data.theta)
         self.all_fthetas.append(data.value_func)
+        print("Step: {}".format(np.linalg.norm(self.theta - data.new_theta)))
         self.theta = data.new_theta
         self.xis = data.new_xis
 
