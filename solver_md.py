@@ -88,13 +88,21 @@ class MdSolver:
 
         if self.noise or self.reg:
             Cxi = (1/J) * xis.T.dot(xis)
-            if self.noise:
+            if self.noise or self.precond_mat is not None:
                 sqrt2Cxi = la.sqrtm(2*Cxi)
                 if J <= dim_u:
                     sqrt2Cxi = np.real(sqrt2Cxi)
                 dW = r.randn(dim_u)
 
-        drift = - (Cxi.dot(ip.inv_Σ.dot(theta)) if self.reg else 0)
+        drift = 0
+        if self.reg:
+            inv_Σ = ip.inv_Σ
+            prior_μ = np.zeros(len(theta))
+            if self.precond_mat is not None:
+                prior_μ = prior_μ - self.precond_vec
+                inv_Σ = sqrt2Cxi.dot(inv_Σ).dot(sqrt2Cxi)
+            drift = - (Cxi.dot(inv_Σ.dot(theta - prior_μ)) if self.reg else 0)
+
         inner_product = ip.inv_Γ.dot(g_theta - ip.y)
         for grad_approx, xi in zip(grads_approx, xis):
             coeff = grad_approx.dot(inner_product)
