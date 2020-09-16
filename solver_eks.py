@@ -11,7 +11,7 @@ default_settings = {
         'parallel': True,
         'adaptive': True,
         'dirname': 'test',
-        'dt_max': 20,
+        'dt_max': 100000,
 }
 
 EksIterationData = collections.namedtuple(
@@ -130,6 +130,7 @@ class EksSolver:
         if self.adaptive:
             norm_drift = np.sqrt(sum(la.norm(d, 2)**2 for d in drifts))
             my_dt = self.dt/(self.dt/self.dt_max + norm_drift)
+            print("Norm of drift: {}".format(norm_drift))
             print("New time step: {}".format(my_dt))
 
         new_ensembles = ensembles - my_dt*drifts \
