@@ -40,6 +40,7 @@ class MdSolver:
         self.precond_mat = opts.get('precond_mat', None)
         if self.precond_mat is not None:
             self.inv_precond_mat = la.inv(self.precond_mat)
+            self.sqrt_precond_mat = la.sqrtm(self.precond_mat)
         if self.adaptive:
             self.dt_min = opts.get('dt_min', default_settings['dt_min'])
             self.dt_max = opts.get('dt_max', default_settings['dt_max'])
@@ -88,7 +89,7 @@ class MdSolver:
 
         if self.noise or self.reg:
             Cxi = (1/J) * xis.T.dot(xis)
-            if self.noise or self.precond_mat is not None:
+            if self.noise:
                 sqrt2Cxi = la.sqrtm(2*Cxi)
                 if J <= dim_u:
                     sqrt2Cxi = np.real(sqrt2Cxi)
@@ -100,8 +101,8 @@ class MdSolver:
             prior_μ = np.zeros(len(theta))
             if self.precond_mat is not None:
                 prior_μ = prior_μ - self.precond_vec
-                inv_Σ = sqrt2Cxi.dot(inv_Σ).dot(sqrt2Cxi)
-            drift = - (Cxi.dot(inv_Σ.dot(theta - prior_μ)) if self.reg else 0)
+                inv_Σ = self.sqrt_precond_mat.dot(inv_Σ).dot(self.sqrt_precond_mat)
+            drift = - Cxi.dot(inv_Σ).dot(theta - prior_μ)
 
         inner_product = ip.inv_Γ.dot(g_theta - ip.y)
         for grad_approx, xi in zip(grads_approx, xis):
@@ -126,7 +127,7 @@ class MdSolver:
         data = MdIterationData(
             solver='md', theta=unmapped_theta, xis=xis, delta=self.delta,
             sigma=self.sigma, dt=my_dt, new_theta=unmapped_new_theta,
-            new_xis=new_xis, value_func=value_func, )
+            new_xis=new_xis, value_func=value_func,)
 
         if filename is not None:
             np.save("{}/{}".format(self.data_dir, filename),
