@@ -171,7 +171,7 @@ class MainModesPlotter(lib_plotters.MainModesPlotter):
 
 class AllCoeffsPlotter(lib_plotters.AllCoeffsPlotter):
 
-    def plot_all_coeffs(self, iteration, data):
+    def plot(self, iteration, data):
         self.ax.clear()
         super().plot(iteration, data)
         self.ax.set_xticks(np.arange(len(G.indices)))

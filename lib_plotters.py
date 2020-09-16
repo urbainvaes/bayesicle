@@ -19,11 +19,14 @@ class AllCoeffsPlotter():
     def __init__(self, ip, **config):
         self.u = ip.unknown
         self.show_weights = config.get('show_weights', False)
+        self.show_text = config.get('show_text', True)
         self.fig, self.ax = plt.subplots()
         self.scatter = self.ax.scatter([], [], cmap=cmap)
         self.cb = None
 
     def set_text(self, iteration, data):
+        if not self.show_text:
+            return
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         text = self.ax.text(
             .03, .98, "Ready", fontsize=18, bbox=props,
@@ -35,6 +38,8 @@ class AllCoeffsPlotter():
         plot_args = {}
         self.ax.clear()
         ensembles = data['ensembles']
+        if len(ensembles) == 0:
+            return
         x_plot = range(len(ensembles[0]))
         if data['solver'] == 'cbs' and self.show_weights:
             if self.cb is None:
@@ -47,12 +52,18 @@ class AllCoeffsPlotter():
                 plot_args['c'] = my_cmap(data['weights'][i]/max_weights)
             self.ax.plot(x_plot, u_i, '.', ms=15, **plot_args)
         for i in range(len(ensembles[0])):
-            mean_dir = np.mean(ensembles[:, i])
-            std_dir = np.std(ensembles[:, i])
-            print(std_dir)
-            y_plot = np.linspace(mean_dir - 3*std_dir, mean_dir + 3*std_dir)
-            x_plot = i + .5*np.exp(-(y_plot - mean_dir)**2/(2*std_dir**2))
-            self.ax.plot(x_plot, y_plot, c='gray')
+            ens = ensembles[:, i]
+            mean_dir = np.mean(ens)
+            std_dir = np.std(ens)
+            y_plot = np.linspace(mean_dir - 4*std_dir, mean_dir + 4*std_dir)
+            if data['solver'] == 'cbs':
+                x_plot = (1/2) * np.exp(-(y_plot - mean_dir)**2/(2*std_dir**2))
+            else:
+                # kernel = scipy.stats.gaussian_kde(ens, bw_method=.1)
+                kernel = scipy.stats.gaussian_kde(ens)
+                x_plot = kernel([y_plot]).T
+                x_plot = (1/2) * x_plot / np.max(x_plot)
+            self.ax.plot(i + x_plot, y_plot, c='gray')
         if self.u is not None:
             self.ax.plot(range(len(self.u)), self.u, 'kx', ms=20, mew=5)
         self.set_text(iteration, data)
@@ -178,7 +189,6 @@ class TwoDimPlotter:
         delta_x, delta_y = xmax - xmin, ymax - ymin
         self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
         self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
-        print(ymin - .1*delta_y, ymax + .1*delta_y)
         if data['solver'] == 'cbs' and self.config.get('show_weights', True):
             title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
                      .format(data['beta'], data['ess'])
