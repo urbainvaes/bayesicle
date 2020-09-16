@@ -14,7 +14,7 @@ matplotlib.rc('font', family='serif')
 matplotlib.rc('text', usetex=True)
 matplotlib.rc('figure', figsize=(18, 11))
 matplotlib.rc('savefig', bbox='tight')
-matplotlib.rc('figure.subplot', hspace=.3)
+matplotlib.rc('figure.subplot', wspace=.06)
 matplotlib.rc('image', cmap='viridis')
 
 solver = 'solver_md'
@@ -23,6 +23,7 @@ model = m.__name__
 
 # Directory of the data
 data_dir = "{}/{}/{}".format(lib_misc.data_root, solver, model)
+fig_dir = lib_misc.fig_root + "/" + model
 
 # MD maximum a posteriori estimate
 u_md = np.load("{}/{}".format(data_dir, "iteration-0100-md.npy"), allow_pickle=True)[()]
@@ -31,24 +32,32 @@ u_md = u_md['theta']
 # Truth
 u_truth = m.u_truth
 
-# Plot
-fig, ax = plt.subplots(1, 2)
+# Plot (Optimization)
+fig, ax = plt.subplots(1, 2, sharex=True, sharey=True)
 G = m.ForwardDarcy(int(np.sqrt(len(u_truth))), 0)
 perm_truth = G(u_truth, return_permeability=True)
-perm_truth = sym.lambdify(perm_truth.free_symbols, perm_truth)
+variables = list(perm_truth.free_symbols)
+variables.sort(key=lambda x: str(x))
+perm_truth = sym.lambdify(variables, perm_truth)
 perm_md = G(u_md, return_permeability=True)
-perm_md = sym.lambdify(perm_md.free_symbols, perm_md)
+perm_md = sym.lambdify(variables, perm_md)
 grid = np.linspace(0, 1, 200)
 X, Y = np.meshgrid(grid, grid)
-ax[0].contourf(X, Y, perm_truth(X, Y))
-ax[1].contourf(X, Y, perm_md(X, Y))
+ax[0].set_aspect('equal')
+ax[1].set_aspect('equal')
+contourf0 = ax[0].contourf(X, Y, perm_truth(X, Y))
+contourf1 = ax[1].contourf(X, Y, perm_md(X, Y))
+contourf1.set_array(contourf0.get_array)
+fig.colorbar(contourf1, ax=ax, fraction=0.022, pad=.03)
+ax[0].set_xlabel('$x_0$')
+ax[1].set_xlabel('$x_0$')
+ax[0].set_ylabel('$x_1$')
+fig.savefig(fig_dir + '/log_permeability.pdf')
 plt.show()
 
-
-if __name__ == "__main__":
-    G = ForwardDarcy(4, 10)
-    u_truth = np.random.randn(len(G.indices))
-    solution = G(u_truth, return_sol=True)
-    p = fen.plot(solution)
-    plt.colorbar(p)
-    plt.show()
+# Plot (Sampling)
+data_file = "simulation-iteration-0150.npy"
+simulation_data = np.load("{}/{}".format(data_dir, data_file), allow_pickle=True)[()]
+plotter = m.AllCoeffsPlotter(m.ip, show_text=False)
+plotter.plot(0, simulation_data)
+plt.show()

@@ -15,7 +15,7 @@ matplotlib.rc('figure', figsize=(18, 11))
 matplotlib.rc('savefig', bbox='tight')
 matplotlib.rc('figure.subplot', hspace=.3)
 
-solver = 'solver_cbs'
+solver = 'solver_md'
 model = m.__name__
 
 
@@ -23,7 +23,7 @@ model = m.__name__
 data_dir = "{}/{}/{}".format(lib_misc.data_root, solver, model)
 
 
-files = glob.glob(data_dir + "/iteration-[0-9][0-9][0-9][0-9].npy")
+files = glob.glob(data_dir + "/simulation-iteration-[0-9][0-9][0-9][0-9].npy")
 files.sort(key=lambda f:
            int(re.search(r"iteration-([0-9]*).npy", f).group(1)))
 
@@ -36,16 +36,6 @@ def update_with(plotter):
         plotter.plot(iteration, it_data)
         plt.pause(.1)
     return update
-
-# plotter = m.AllCoeffsPlotter(m.ip, coeffs=[0, 3, 4])
-# for i in range(100):
-#     print(i)
-#     it_data = np.load(files[i], allow_pickle=True)[()]
-#     iteration = re.search(r"iteration-([0-9]*).npy", files[i]).group(1)
-#     plotter.plot(iteration, it_data)
-#     plt.draw()
-#     plt.pause(.1)
-
 
 animate = animation.FuncAnimation
 # plotter_1 = m.MainModesPlotter(m.ip, show_weights=True)

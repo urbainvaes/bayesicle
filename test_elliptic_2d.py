@@ -81,7 +81,7 @@ solver_md = solvers.MdSolver(
     sigma=1e-5,
     dt=.1,
     reg=True,
-    noise=False,
+    noise=True,
     parallel=True,
     adaptive=False,
     dt_min=1e-7,
@@ -98,7 +98,7 @@ simulation = solvers.MdSimulation(
         initial=theta,
         solver=solver_md)
 
-n_iter = 200
+n_iter = 1000
 for i in range(n_iter):
     if i > 1 and i % 1 == 0:
         plotter.plot(i, simulation.get_data())
