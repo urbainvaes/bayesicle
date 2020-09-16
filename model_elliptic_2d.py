@@ -14,7 +14,7 @@ matplotlib.rc('savefig', bbox='tight')
 matplotlib.rc('text', usetex=True)
 
 # Fix seed
-np.random.seed(0)
+np.random.seed(20)
 
 # Definition of the forward model {{{1
 # ====================================
@@ -69,9 +69,15 @@ class ForwardDarcy():
         self.lin_func = rhs*self.test_f*fen.dx
         # ----------------------------------------------- #
 
-    def __call__(self, u_test, return_sol=False):
+    def __call__(self, u_test, return_sol=False, return_permeability=False):
+
+        # Pad with zeros
+        u_test = np.pad(u_test, (0, len(self.indices) - len(u_test)))
+
         # Assembling diffusivity
         log_coeff = sum([ui*fi for ui, fi in zip(u_test, self.functions)], 0)
+        if return_permeability:
+            return log_coeff
 
         ccode_coeff = sym.ccode(sym.exp(log_coeff))
         diff = fen.Expression(ccode_coeff, degree=2)
@@ -106,14 +112,11 @@ if __name__ == "__main__":
 γ, σ = .01, 1
 
 # Initialize forward model
-dx, Kx = 3, 10
+dx, Kx = 6, 10
 G = ForwardDarcy(dx, Kx)
 
 # Fourier coefficients of the true (scalar) diffusivity
 u = σ*np.random.randn(len(G.indices))
-
-# Parameters
-d = len(u)
 
 # Forward model
 forward = G.__call__
@@ -121,6 +124,15 @@ forward = G.__call__
 # Observation without noise
 y = forward(u)
 K = len(y)
+
+# Forward model for approximation
+dx, Kx = 3, 10
+G = ForwardDarcy(dx, Kx)
+
+# Approximation
+d = len(G.indices)
+u_truth = u
+u = u[:d]
 
 # Covariance of noise and prior
 Σ = np.diag([σ**2]*d)
@@ -167,4 +179,4 @@ class AllCoeffsPlotter(lib_plotters.AllCoeffsPlotter):
 
 
 # Delete local variables to make them unaccessible outside
-del ForwardDarcy, γ, σ, dx, Kx, u, d, forward, Σ, Γ, rtΓ, y
+del γ, σ, dx, Kx, u, d, forward, Σ, Γ, rtΓ, y
