@@ -56,8 +56,18 @@ fig.savefig(fig_dir + '/log_permeability.pdf')
 plt.show()
 
 # Plot (Sampling)
-data_file = "simulation-iteration-0150.npy"
+data_file = "simulation-iteration-1000-extended.npy"
+data_file = "simulation-iteration-1000-nonextended.npy"
 simulation_data = np.load("{}/{}".format(data_dir, data_file), allow_pickle=True)[()]
+
+# Calculate the error in number of std deviations
+u_truth = m.u_truth[:9]
+std = np.std(simulation_data['ensembles'], axis=0)
+diff = np.abs(np.mean(simulation_data['ensembles'], axis=0) - u_truth)
+print(diff/std)
+
 plotter = m.AllCoeffsPlotter(m.ip, show_text=False)
 plotter.plot(0, simulation_data)
+plotter.ax.set_xlabel("Karhunen--Loève coefficients")
+plotter.fig.savefig(fig_dir + '/samples_kl_coeffs.pdf')
 plt.show()

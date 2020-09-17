@@ -24,13 +24,13 @@ solver = solvers.CbsSolver(
     opti=False,
     dirname=m.__name__)
 
-solver = solvers.EksSolver(
-    dt=1,
-    reg=True,
-    noise=True,
-    parallel=True,
-    adaptive=True,
-    dirname=m.__name__)
+# solver = solvers.EksSolver(
+#     dt=1,
+#     reg=True,
+#     noise=True,
+#     parallel=True,
+#     adaptive=True,
+#     dirname=m.__name__)
 
 # solver = solver_md.MdSolver(
 #     delta=.001, sigma=.001,
@@ -50,14 +50,13 @@ iter_0 = 0
 if False:
 
     # Load from file
-    data_file = "/solver_cbs/model_elliptic_2d/iteration-0050-cbs-extended.npy"
-    data_file = "/solver_eks/model_elliptic_2d/iteration-0150.npy"
-    data = np.load(lib_misc.data_root + data_file, allow_pickle=True)[()]
-    ensembles = data['ensembles']
-    iter_0 = 151
+    # data_file = "/solver_cbs/model_elliptic_2d/iteration-0050-cbs-extended.npy"
+    # data_file = "/solver_eks/model_elliptic_2d/iteration-0150.npy"
+    # data = np.load(lib_misc.data_root + data_file, allow_pickle=True)[()]
+    # ensembles = data['ensembles']
 
 
-    niter = 1000
+    niter = 50
     for i in range(iter_0, iter_0 + niter):
         data = solver.step(m.ip, ensembles, filename="iteration-{:04d}.npy".format(i))
         ensembles = data.new_ensembles
@@ -67,7 +66,8 @@ if False:
 
 
 # Calculate preconditioner based on final iteration of EKS
-data_file = "/solver_eks/model_elliptic_2d/preconditioner_eks.npy"
+# data_file = "/solver_eks/model_elliptic_2d/preconditioner_eks.npy"
+data_file = "/solver_cbs/model_elliptic_2d/precond_non_extended.npy"
 data = np.load(lib_misc.data_root + data_file, allow_pickle=True)[()]
 ensembles = data['ensembles']
 precond_vec = np.mean(ensembles, axis=0)
