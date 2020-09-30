@@ -25,9 +25,8 @@ solver_cbs = solvers.CbsSolver(
     dirname=m.__name__)
 
 solver_cbo = solvers.CboSolver(
-    dt=.005,
+    dt=.5,
     parallel=True,
-    adaptive=True,
     beta=100,
     lamda=1,
     sigma=.1,

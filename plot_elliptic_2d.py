@@ -5,7 +5,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-import model_elliptic_2d as m
+import model_elliptic_2d_constrained as m
 import lib_misc
 
 matplotlib.rc('font', size=20)
@@ -15,7 +15,7 @@ matplotlib.rc('figure', figsize=(18, 11))
 matplotlib.rc('savefig', bbox='tight')
 matplotlib.rc('figure.subplot', hspace=.3)
 
-solver = 'solver_md'
+solver = 'solver_eks'
 model = m.__name__
 
 
@@ -23,7 +23,7 @@ model = m.__name__
 data_dir = "{}/{}/{}".format(lib_misc.data_root, solver, model)
 
 
-files = glob.glob(data_dir + "/simulation-iteration-[0-9][0-9][0-9][0-9].npy")
+files = glob.glob(data_dir + "/iteration-[0-9][0-9][0-9][0-9].npy")
 files.sort(key=lambda f:
            int(re.search(r"iteration-([0-9]*).npy", f).group(1)))
 
@@ -34,7 +34,7 @@ def update_with(plotter):
         it_data = np.load(files[i], allow_pickle=True)[()]
         iteration = re.search(r"iteration-([0-9]*).npy", files[i]).group(1)
         plotter.plot(iteration, it_data)
-        plt.pause(.1)
+        plt.pause(.5)
     return update
 
 animate = animation.FuncAnimation

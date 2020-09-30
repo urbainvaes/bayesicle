@@ -120,6 +120,7 @@ class EksSolver:
                               * ip.eq_constraint_grad(ensembles[i])
 
         if ip.ineq_constraint is not None:
+            print("here")
             for i, _ in enumerate(drifts):
                 drifts[i] += (1/self.constraint_eps) \
                               * ip.ineq_constraint(ensembles[i]) \

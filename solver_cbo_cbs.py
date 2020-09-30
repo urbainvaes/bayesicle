@@ -8,7 +8,6 @@ import numpy as np
 import scipy as sp
 import lib_misc
 
-data_root = "{}/solver_cbs".format(lib_misc.data_root)
 default_settings = {
         'verbose': False,
         'parallel': True,
@@ -29,9 +28,6 @@ class CbSolver:
         self.frac_max = opts.get('frac_max', 1/2)
         self.reg = opts.get('reg', True)
         self.verbose = opts.get('verbose', default_settings['verbose'])
-        dirname = opts.get('dirname', default_settings['dirname'])
-        self.data_dir = "{}/{}".format(data_root, dirname)
-        os.makedirs(self.data_dir, exist_ok=True)
 
     def f_ensembles(self, ip, ensembles):
         the_function = ip.reg_least_squares if self.reg \
@@ -93,6 +89,10 @@ class CbsSolver(CbSolver):
         super().__init__(**opts)
         self.opti = opts.get('opti', False)
         self.reg = opts.get('reg', True)
+        dirname = opts.get('dirname', default_settings['dirname'])
+        data_root = "{}/solver_cbs".format(lib_misc.data_root)
+        self.data_dir = "{}/{}".format(data_root, dirname)
+        os.makedirs(self.data_dir, exist_ok=True)
 
     def step(self, ip, ensembles, filename=None):
         J = ensembles.shape[0]
@@ -146,6 +146,10 @@ class CboSolver(CbSolver):
         super().__init__(**opts)
         self.lamda = opts.get('lamda', 1)
         self.sigma = opts.get('sigma', 1)
+        dirname = opts.get('dirname', default_settings['dirname'])
+        data_root = "{}/solver_cbo".format(lib_misc.data_root)
+        self.data_dir = "{}/{}".format(data_root, dirname)
+        os.makedirs(self.data_dir, exist_ok=True)
 
         # Constraint
         self.constraint_eps = opts.get('epsilon', .1)
@@ -175,7 +179,7 @@ class CboSolver(CbSolver):
                                 * ip.ineq_constraint_grad(ensembles[i])
 
         data = CboIterationData(
-            solver='cbs', ensembles=ensembles, f_ensembles=f_ensembles,
+            solver='cbo', ensembles=ensembles, f_ensembles=f_ensembles,
             beta=self.beta, weights=weights.reshape(J), ess=ess,
             dt=self.dt, new_ensembles=new_ensembles, sigma=self.sigma,
             lamda=self.lamda)

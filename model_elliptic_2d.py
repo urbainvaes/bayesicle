@@ -121,6 +121,9 @@ u = σ*np.random.randn(len(G.indices))
 # Forward model
 forward = G.__call__
 
+# For appendix results
+u[9:] = 0
+
 # Observation without noise
 y = forward(u)
 K = len(y)

@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # Preconditioning
     precond_vec = np.array([0, 0])
     precond_mat = np.eye(len(precond_vec))
-    use_precond = False
+    use_precond = True
 
     if use_precond:
         # Number of particles
@@ -67,11 +67,11 @@ if __name__ == "__main__":
 
         n_iter_precond = 500
         for i in range(n_iter_precond):
-            data = solver_eks.step(m.ip, ensembles,
+            data = solver_cbs.step(m.ip, ensembles,
                                    filename="iteration-{:04d}.npy".format(i))
             ensembles = data.new_ensembles
             plotter.plot(i, data._asdict())
-            if i % 50 == 0:
+            if i % 1 == 0:
                 plt.pause(1)
                 plt.draw()
         precond_vec = np.mean(ensembles, axis=0)
