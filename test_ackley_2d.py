@@ -35,7 +35,7 @@ solver_eks = solvers.EksSolver(
     parallel=True,
     adaptive=True,
     dirname=m.__name__,
-    epsilon = 1)
+    epsilon=1)
 
 # Number of particles
 J = 10000

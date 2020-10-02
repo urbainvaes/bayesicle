@@ -15,7 +15,9 @@ matplotlib.rc('figure', figsize=(18, 11))
 matplotlib.rc('savefig', bbox='tight')
 matplotlib.rc('figure.subplot', hspace=.3)
 
-solver = 'solver_eks'
+solver = 'solver_cbo'
+# model = m.__name__ + '_small_sigma'
+# model = m.__name__ + '_small_epsilon'
 model = m.__name__
 
 
@@ -28,22 +30,39 @@ files.sort(key=lambda f:
            int(re.search(r"iteration-([0-9]*).npy", f).group(1)))
 
 
-def update_with(plotter):
+def update_with(plotter=None):
+    if plotter is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = plotter.fig
+
     def update(i):
         print(i)
         it_data = np.load(files[i], allow_pickle=True)[()]
         iteration = re.search(r"iteration-([0-9]*).npy", files[i]).group(1)
-        plotter.plot(iteration, it_data)
+        if plotter is None:
+            ax.clear()
+            ax.set_aspect('equal')
+            ensembles = it_data['ensembles']
+            theta = np.linspace(0, 2*np.pi)
+            ax.plot(.5 + .2*np.cos(theta), .5 + .2*np.sin(theta))
+            ax.plot(ensembles[:, 2], ensembles[:, 3], '.')
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+        else:
+            plotter.plot(iteration, it_data)
         plt.pause(.5)
-    return update
+    return update, fig
+
 
 animate = animation.FuncAnimation
-# plotter_1 = m.MainModesPlotter(m.ip, show_weights=True)
-# anim_1 = animate(plotter_1.fig, update_with(plotter_1), len(files),
-#                  repeat=False)
-# plt.show()
 
-plotter_2 = m.AllCoeffsPlotter(m.ip, coeffs=[0, 3, 4])
-anim_2 = animate(plotter_2.fig, update_with(plotter_2), len(files),
-                 lambda: None, repeat=False)
+plotter_2 = m.AllCoeffsPlotter(m.ip)
+update, fig = update_with(plotter_2)
+anim_1 = animate(fig, update, len(files), repeat=False)
 plt.show()
+
+update, fig = update_with(None)
+anim_1 = animate(fig, update, len(files), repeat=False)
+plt.show()
+

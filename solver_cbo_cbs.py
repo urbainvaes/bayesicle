@@ -21,7 +21,7 @@ class CbSolver:
 
     def __init__(self, **opts):
         self.dt = opts['dt']
-        self.adaptive = opts['adaptive']
+        self.adaptive = opts.get('adaptive', False)
         self.beta = opts.get('beta', default_settings['beta'])  # Last β
         self.parallel = opts.get('parallel', default_settings['parallel'])
         self.frac_min = opts.get('frac_min', 1/5)
@@ -87,6 +87,7 @@ class CbsSolver(CbSolver):
 
     def __init__(self, **opts):
         super().__init__(**opts)
+        self.adaptive = opts.get('adaptive', default_settings['adaptive'])
         self.opti = opts.get('opti', False)
         self.reg = opts.get('reg', True)
         dirname = opts.get('dirname', default_settings['dirname'])
@@ -142,7 +143,6 @@ CboIterationData = collections.namedtuple(
 class CboSolver(CbSolver):
 
     def __init__(self, **opts):
-        opts['adaptive'] = False
         super().__init__(**opts)
         self.lamda = opts.get('lamda', 1)
         self.sigma = opts.get('sigma', 1)

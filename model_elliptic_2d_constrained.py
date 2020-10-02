@@ -141,8 +141,8 @@ grad_constraint = [constraint.diff(v) for v in [diff_1, diff_2, ix, iy]]
 constraint = sym.lambdify((diff_1, diff_2, ix, iy), constraint)
 grad_constraint = sym.lambdify((diff_1, diff_2, ix, iy), grad_constraint)
 constraints = {
-        'ineq_constraint': lambda x: constraint(*x),
-        'ineq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
+        'eq_constraint': lambda x: constraint(*x),
+        'eq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
         }
 
 # Inverse problem
