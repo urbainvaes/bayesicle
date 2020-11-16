@@ -61,8 +61,8 @@ solver, plot_step = solver_cbo, 10
 n_iter = 100000
 for i in range(n_iter):
     print("Iteration {:04d}".format(i))
-    data = solver.step(m.ip, ensembles,
-                       filename="iteration-{:04d}.npy".format(i))
+    data = solver_cbs.step(m.ip, ensembles,
+            filename="iteration-{:04d}.npy".format(i))
     ensembles = data.new_ensembles
     plotter.plot(i, data._asdict())
     if i % plot_step == 0:

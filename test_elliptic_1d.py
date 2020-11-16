@@ -14,7 +14,7 @@ solver_cbs = solvers.CbsSolver(
     parallel=True,
     adaptive=True,
     dirname=m.__name__,
-    opti=False)
+    opti=True)
 
 solver_cbo = solvers.CboSolver(
     dt=.1,
@@ -61,8 +61,8 @@ if __name__ == "__main__":
         J = 1000
 
         # ensembles_x = np.random.randn(J)
-        ensembles_x = np.random.randn(J)
-        ensembles_y = 90 + 20*np.random.rand(J)
+        ensembles_x = .5*np.random.randn(J)
+        ensembles_y = 60 + 30*np.random.rand(J)
         ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
         n_iter_precond = 500
