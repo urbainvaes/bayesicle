@@ -15,7 +15,7 @@ solver_cbs = solvers.CbsSolver(
     parallel=True,
     adaptive=True,
     dirname=m.__name__,
-    opti=False)
+    opti=True)
 
 solver_cbo = solvers.CboSolver(
     dt=.005,
@@ -28,12 +28,12 @@ solver_cbo = solvers.CboSolver(
     epsilon=1)
 
 solver_eks = solvers.EksSolver(
-    dt=.1,
+    dt=.01,
     dt_max=10,
     reg=True,
     noise=False,
     parallel=True,
-    adaptive=True,
+    adaptive=False,
     dirname=m.__name__,
     epsilon=1)
 
@@ -55,7 +55,7 @@ plotter = m.Plotter(m.ip, show_weights=True, cutoff=500,
                     contour=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=5)
 
 # solver, plot_step = solver_eks, 10
-solver, plot_step = solver_cbo, 10
+solver, plot_step = solver_cbo, 1
 
 # Main loop
 n_iter = 100000

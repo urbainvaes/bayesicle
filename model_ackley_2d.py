@@ -3,15 +3,11 @@ import lib_inverse_problem
 import lib_plotters
 import sympy as sym
 
+a, b = 2.5, 2.5
 
 def ackley_2d(x, y):
-    # a, b = 2, 2
-    a, b = 2.5, 2.5
-    # a, b = 0.6, .99
     return -20*np.exp(-0.2*np.sqrt(0.5*(np.power(x-a, 2)+np.power(y-b, 2)))) \
            - np.exp(0.5*(np.cos(2*np.pi*(x-a))+np.cos(2*np.pi*(y-b)))) + 20 + np.e
-    # return (x-.1)**2 + (y-.1)**2
-
 
 def forward(u):
     return np.array([ackley_2d(*u)])
@@ -31,22 +27,22 @@ y = np.array([-.1])
 
 # Constraint
 vx, vy = sym.symbols('x y', real=True)
-constraint = vx**2 + vy**2 - (2*np.sqrt(2))**2
+constraint = vx**2 + vy**2 - (a**2 + b**2)
 # constraint = vx**2 + vy**2 + (vx + vy)**2/(.5 + (vx - vy)**2) - 2**2
 # constraint = sym.cos(vx) - vy
 grad_constraint = [constraint.diff(vx), constraint.diff(vy)]
 constraint = sym.lambdify((vx, vy), constraint)
 grad_constraint = sym.lambdify((vx, vy), grad_constraint)
 
-# constraints = {
-#         'eq_constraint': lambda x: constraint(*x),
-#         'eq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
-#         }
-
 constraints = {
-        'ineq_constraint': lambda x: constraint(*x),
-        'ineq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
+        'eq_constraint': lambda x: constraint(*x),
+        'eq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
         }
+
+# constraints = {
+#         'ineq_constraint': lambda x: constraint(*x),
+#         'ineq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
+#         }
 
 ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y, **constraints)
 Plotter = lib_plotters.TwoDimPlotter

@@ -113,19 +113,18 @@ class EksSolver:
         #         + (C_theta.dot(ip.inv_Σ.dot(u)) if self.reg else 0)
         #     drifts.append(drift)
 
-        if ip.eq_constraint is not None:
-            for i, _ in enumerate(drifts):
-                drifts[i] += (1/self.constraint_eps) \
-                              * ip.eq_constraint(ensembles[i]) \
-                              * ip.eq_constraint_grad(ensembles[i])
+        # if ip.eq_constraint is not None:
+        #     for i, _ in enumerate(drifts):
+        #         drifts[i] += (1/self.constraint_eps) \
+        #                       * ip.eq_constraint(ensembles[i]) \
+        #                       * ip.eq_constraint_grad(ensembles[i])
 
-        if ip.ineq_constraint is not None:
-            print("here")
-            for i, _ in enumerate(drifts):
-                drifts[i] += (1/self.constraint_eps) \
-                              * ip.ineq_constraint(ensembles[i]) \
-                              * max(ip.ineq_constraint(ensembles[i]), 0) \
-                              * ip.ineq_constraint_grad(ensembles[i])
+        # if ip.ineq_constraint is not None:
+        #     for i, _ in enumerate(drifts):
+        #         drifts[i] += (1/self.constraint_eps) \
+        #                       * ip.ineq_constraint(ensembles[i]) \
+        #                       * max(ip.ineq_constraint(ensembles[i]), 0) \
+        #                       * ip.ineq_constraint_grad(ensembles[i])
 
         my_dt = self.dt
         if self.adaptive:
@@ -134,9 +133,17 @@ class EksSolver:
             print("Norm of drift: {}".format(norm_drift))
             print("New time step: {}".format(my_dt))
 
+        # new_ensembles = ensembles - my_dt*drifts \
+        #     + (np.sqrt(my_dt) * dW.dot(sqrtCtheta) if self.noise else 0)
+
+        constraint = ensembles[:, 0]**2 + ensembles[:, 1]**2 - (2*2.5**2)
+        constraint = np.reshape(constraint, (len(constraint), 1))
+
         new_ensembles = ensembles - my_dt*drifts \
             + (np.sqrt(my_dt) * dW.dot(sqrtCtheta) if self.noise else 0)
+        new_ensembles = new_ensembles / (1 + constraint*my_dt/self.constraint_eps)
 
+        # import ipdb; ipdb.set_trace()
         # new_ensembles = np.zeros((J, ip.d))
         # for (j, u), drift in zip(enumerate(ensembles), drifts):
         #     new_ensembles[j] = u - my_dt*drift \
