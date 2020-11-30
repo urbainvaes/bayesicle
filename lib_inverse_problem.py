@@ -15,7 +15,8 @@ def direct_min(f, x0):
 
 class InverseProblem:
 
-    def __init__(self, forward, Γ, Σ, y, unknown=None, **constraints):
+    def __init__(self, forward, Γ, Σ, y, unknown=None, 
+                 argmin=None, fmin=None, **constraints):
         self.forward = forward
         self.d = len(Σ)
         self.K = len(Γ)
@@ -25,8 +26,8 @@ class InverseProblem:
         self.unknown = unknown
 
         self.Z_normal = None
-        self.argmin = None
-        self.fmin = None
+        self.argmin = argmin
+        self.fmin = fmin
 
         self.eq_constraint = constraints.get('eq_constraint', None)
         self.eq_constraint_grad = constraints.get('eq_constraint_grad', None)
