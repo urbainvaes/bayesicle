@@ -193,7 +193,7 @@ class TwoDimPlotter:
             title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
                      .format(data['beta'], data['ess'])
             self.scatter.set_array(data['weights'])
-            sizes = 1 + 40*data['weights']/np.max(data['weights'])
+            sizes = 5 + 40*data['weights']/np.max(data['weights'])
             self.scatter.set_sizes(sizes)
             self.scatter.set_clim((0, np.max(data['weights'])))
         if data['solver'] == 'md' and self.config.get('show_weights', True):

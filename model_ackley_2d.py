@@ -33,16 +33,19 @@ constraint = vx**2 + vy**2 - (a**2 + b**2)
 grad_constraint = [constraint.diff(vx), constraint.diff(vy)]
 constraint = sym.lambdify((vx, vy), constraint)
 grad_constraint = sym.lambdify((vx, vy), grad_constraint)
+constraints = {}
 
-constraints = {
-        'eq_constraint': lambda x: constraint(*x),
-        'eq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
-        }
+# constraints = {
+#         'eq_constraint': lambda x: constraint(*x),
+#         'eq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
+#         }
 
 # constraints = {
 #         'ineq_constraint': lambda x: constraint(*x),
 #         'ineq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
 #         }
 
-ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y, **constraints)
+argmin = np.array([a, b])
+ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y,
+                                        argmin=argmin, fmin=0, **constraints)
 Plotter = lib_plotters.TwoDimPlotter

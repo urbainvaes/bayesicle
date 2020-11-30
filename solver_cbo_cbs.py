@@ -104,22 +104,14 @@ class CbsSolver(CbSolver):
         cov = [x.reshape(ip.d, 1) * x.reshape(1, ip.d) for x in diff]
         cov = np.sum(np.array(cov) * weights.reshape(J, 1, 1), axis=0)
         new_ensembles = np.zeros((J, ip.d))
-        if self.opti:
-            coeff_noise = sp.linalg.sqrtm(cov)
-            if J <= ip.d:
-                coeff_noise = np.real(coeff_noise)
-            for j in range(J):
-                new_ensembles[j] = mean \
-                    + coeff_noise.dot(np.random.randn(ip.d))
-        else:
-            coeff_noise = np.sqrt((1 - np.exp(-2*self.dt))/2) \
-                * sp.linalg.sqrtm(2*(1+self.beta)*cov)
-            if J <= ip.d:
-                coeff_noise = np.real(coeff_noise)
+        coeff_noise = np.sqrt((1 - np.exp(-2*self.dt))/2) \
+            * sp.linalg.sqrtm(2*cov*(1 if self.opti else (1+self.beta)))
+        if J <= ip.d:
             coeff_noise = np.real(coeff_noise)
-            for j in range(J):
-                new_ensembles[j] = mean + np.exp(-self.dt)*diff[j] \
-                                   + coeff_noise.dot(np.random.randn(ip.d))
+        coeff_noise = np.real(coeff_noise)
+        for j in range(J):
+            new_ensembles[j] = mean + np.exp(-self.dt)*diff[j] \
+                               + coeff_noise.dot(np.random.randn(ip.d))
 
         data = CbsIterationData(
             solver='cbs', ensembles=ensembles, f_ensembles=f_ensembles,

@@ -11,11 +11,11 @@ np.random.seed(0)
 
 # Solvers
 solver_cbs = solvers.CbsSolver(
-    dt=1,
+    dt=np.inf,
     parallel=True,
     adaptive=True,
     dirname=m.__name__,
-    opti=True)
+    opti=False)
 
 solver_cbo = solvers.CboSolver(
     dt=.005,
@@ -38,12 +38,9 @@ solver_eks = solvers.EksSolver(
     epsilon=1)
 
 # Number of particles
-J = 10000
-
-ensembles_x = 0 + 3*np.random.randn(J)
-ensembles_y = 0 + 3*np.random.randn(J)
-# ensembles_x = 0 + .5*np.random.randn(J)
-# ensembles_y = 0 + .5*np.random.randn(J)
+J = 50
+ensembles_x = 0 + 100*np.random.randn(J)
+ensembles_y = 0 + 100*np.random.randn(J)
 ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 
@@ -52,16 +49,16 @@ ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 # Plots
 plotter = m.Plotter(m.ip, show_weights=True, cutoff=500,
-                    contour=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=5)
+                    contours=False, Lx=1, Ly=1, Lx_contours=5, Ly_contours=5)
 
 # solver, plot_step = solver_eks, 10
-solver, plot_step = solver_cbo, 1
+solver, plot_step = solver_cbs, 1
 
 # Main loop
 n_iter = 100000
 for i in range(n_iter):
     print("Iteration {:04d}".format(i))
-    data = solver_cbs.step(m.ip, ensembles,
+    data = solver.step(m.ip, ensembles,
             filename="iteration-{:04d}.npy".format(i))
     ensembles = data.new_ensembles
     plotter.plot(i, data._asdict())
