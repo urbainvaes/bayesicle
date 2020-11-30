@@ -9,8 +9,14 @@ def ackley_2d(x, y):
     return -20*np.exp(-0.2*np.sqrt(0.5*(np.power(x-a, 2)+np.power(y-b, 2)))) \
            - np.exp(0.5*(np.cos(2*np.pi*(x-a))+np.cos(2*np.pi*(y-b)))) + 20 + np.e
 
+def rastrigin_function_2d(x, y):
+    n, x1, x2, A = 2, 2, 4, 10
+    return A*n + (x1**2 - A*np.cos(2*np.pi*x1)) + (x2**2 - A*np.cos(2*np.pi*x2))
+
 def forward(u):
-    return np.array([ackley_2d(*u)])
+    fun = rastrigin_function_2d
+    # fun = ackley_2d
+    return np.array([rastrigin_function_2d(*u)])
 
 
 # Dimensions of the model
