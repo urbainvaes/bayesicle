@@ -15,7 +15,7 @@ solver_cbs = solvers.CbsSolver(
     parallel=True,
     adaptive=True,
     dirname=m.__name__,
-    opti=False)
+    opti=True)
 
 solver_cbo = solvers.CboSolver(
     dt=.005,
@@ -37,19 +37,15 @@ solver_eks = solvers.EksSolver(
     dirname=m.__name__,
     epsilon=1)
 
-# Number of particles
-J = 50
-ensembles_x = 0 + 100*np.random.randn(J)
-ensembles_y = 0 + 100*np.random.randn(J)
-ensembles = np.vstack((ensembles_x, ensembles_y)).T
-
-
-# argmin = opti.basinhopping(lambda x: m.ackley_2d(*x),
-#                            x0=[0, 0], T=.5, disp=True)
-
 # Plots
 plotter = m.Plotter(m.ip, show_weights=True, cutoff=500,
-                    contours=False, Lx=1, Ly=1, Lx_contours=5, Ly_contours=5)
+                    contours=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=5)
+
+# Number of particles
+J = 500
+ensembles_x = 1 + .5*np.random.randn(J)
+ensembles_y = 1 + .5*np.random.randn(J)
+ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 # solver, plot_step = solver_eks, 10
 solver, plot_step = solver_cbs, 1

@@ -9,21 +9,28 @@ def ackley_2d(x, y):
     return -20*np.exp(-0.2*np.sqrt(0.5*(np.power(x-a, 2)+np.power(y-b, 2)))) \
            - np.exp(0.5*(np.cos(2*np.pi*(x-a))+np.cos(2*np.pi*(y-b)))) + 20 + np.e
 
+
 def rastrigin_function_2d(x, y):
-    n, x1, x2, A = 2, 2, 4, 10
-    return A*n + (x1**2 - A*np.cos(2*np.pi*x1)) + (x2**2 - A*np.cos(2*np.pi*x2))
+    n, A = 2, 10
+    return A*n + (x**2 - A*np.cos(2*np.pi*x)) + (y**2 - A*np.cos(2*np.pi*y))
+
+
+def rosenbrock_function_2d(x, y):
+    return 100*(y-x**2)**2 + (1-x)**2
+
 
 def forward(u):
-    fun = rastrigin_function_2d
+    fun = rosenbrock_function_2d
+    # fun = rastrigin_function_2d
     # fun = ackley_2d
-    return np.array([rastrigin_function_2d(*u)])
+    return np.array([fun(*u)])
 
 
 # Dimensions of the model
 d, K = 2, 1
 
 # Data = lower bound
-y = np.array([-.1])
+y = np.array([0])
 
 # Covariance of noise and prior
 # γ, σ = 1, .5
