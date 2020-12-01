@@ -140,10 +140,12 @@ class TwoDimPlotter:
         self.Ly = config.get('Ly', 1.5)
         x_plot = self.argmin[0] + self.Lx*np.linspace(-1, 1, n_grid)
         y_plot = self.argmin[1] + self.Ly*np.linspace(-1, 1, n_grid)
-        X, Y = np.meshgrid(x_plot, y_plot)
-        Z = (1/ip.normalization()) * ip.posterior(X, Y)
-        cmap_posterior = plt.cm.get_cmap('binary')
-        self.ax.contourf(X, Y, Z, levels=100, cmap=cmap_posterior)
+        self.ax.plot(ip.argmin[0], ip.argmin[1], 'kx', ms=20, mew=5)
+        if config.get('opti', False):
+            X, Y = np.meshgrid(x_plot, y_plot)
+            Z = (1/ip.normalization()) * ip.posterior(X, Y)
+            cmap_posterior = plt.cm.get_cmap('binary')
+            self.ax.contourf(X, Y, Z, levels=100, cmap=cmap_posterior)
         if config.get('contours', True):
             Lx_contour = config.get('Lx_contours', 1)
             Ly_contour = config.get('Ly_contours', 1)

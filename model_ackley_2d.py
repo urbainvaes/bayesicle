@@ -5,6 +5,7 @@ import sympy as sym
 
 a, b = 2.5, 2.5
 
+
 def ackley_2d(x, y):
     return -20*np.exp(-0.2*np.sqrt(0.5*(np.power(x-a, 2)+np.power(y-b, 2)))) \
            - np.exp(0.5*(np.cos(2*np.pi*(x-a))+np.cos(2*np.pi*(y-b)))) + 20 + np.e
@@ -19,11 +20,14 @@ def rosenbrock_function_2d(x, y):
     return 100*(y-x**2)**2 + (1-x)**2
 
 
+fun, argmin, fmin = rosenbrock_function_2d, np.array([1, 1]), 0
+# fun, argmin, fmin = rastrigin_function_2d, np.array([0, 0]), 0
+# fun, argmin, fmin = ackley_2d, np.array([a, b]), 0
+
+
 def forward(u):
-    fun = rosenbrock_function_2d
-    # fun = rastrigin_function_2d
-    # fun = ackley_2d
-    return np.array([fun(*u)])
+    # Sqrt for inverse problem!
+    return np.sqrt(np.array([fun(*u)]))
 
 
 # Dimensions of the model
@@ -58,7 +62,6 @@ constraints = {}
 #         'ineq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
 #         }
 
-argmin = np.array([a, b])
 ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y,
                                         argmin=argmin, fmin=0, **constraints)
 Plotter = lib_plotters.TwoDimPlotter

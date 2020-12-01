@@ -1,4 +1,3 @@
-import sympy as sym
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -39,16 +38,17 @@ solver_eks = solvers.EksSolver(
 
 # Plots
 plotter = m.Plotter(m.ip, show_weights=True, cutoff=500,
-                    contours=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=5)
+                    contours=True, Lx=.01, Ly=.01, Lx_contours=5, Ly_contours=5)
 
 # Number of particles
-J = 500
-ensembles_x = 1 + .5*np.random.randn(J)
-ensembles_y = 1 + .5*np.random.randn(J)
+J = 10000
+ensembles_x = -1 + 1*np.random.randn(J)
+ensembles_y = -1 + 1*np.random.randn(J)
 ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 # solver, plot_step = solver_eks, 10
-solver, plot_step = solver_cbs, 1
+solver, plot_step = solver_cbs, 10
+# solver, plot_step = solver_cbo, 1
 
 # Main loop
 n_iter = 100000

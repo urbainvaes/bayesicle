@@ -15,7 +15,7 @@ def direct_min(f, x0):
 
 class InverseProblem:
 
-    def __init__(self, forward, Γ, Σ, y, unknown=None, 
+    def __init__(self, forward, Γ, Σ, y, unknown=None,
                  argmin=None, fmin=None, **constraints):
         self.forward = forward
         self.d = len(Σ)

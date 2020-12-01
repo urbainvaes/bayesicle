@@ -78,9 +78,8 @@ class CbSolver:
 
 
 CbsIterationData = collections.namedtuple(
-    'CbsIterationData', [
-        'solver', 'ensembles', 'f_ensembles', 'beta',
-        'weights', 'ess', 'dt', 'new_ensembles'])
+    'CbsIterationData', ['opti', 'solver', 'ensembles', 'f_ensembles', 'beta',
+                         'weights', 'ess', 'dt', 'new_ensembles'])
 
 
 class CbsSolver(CbSolver):
@@ -114,9 +113,10 @@ class CbsSolver(CbSolver):
                                + coeff_noise.dot(np.random.randn(ip.d))
 
         data = CbsIterationData(
-            solver='cbs', ensembles=ensembles, f_ensembles=f_ensembles,
-            beta=self.beta, weights=weights.reshape(J), ess=ess,
-            dt=self.dt, new_ensembles=new_ensembles)
+            solver='cbs', opti=self.opti, ensembles=ensembles,
+            f_ensembles=f_ensembles, beta=self.beta,
+            weights=weights.reshape(J), ess=ess, dt=self.dt,
+            new_ensembles=new_ensembles)
 
         if filename is not None:
             np.save("{}/{}".format(self.data_dir, filename),
