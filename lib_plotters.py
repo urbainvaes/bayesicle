@@ -141,7 +141,7 @@ class TwoDimPlotter:
         x_plot = self.argmin[0] + self.Lx*np.linspace(-1, 1, n_grid)
         y_plot = self.argmin[1] + self.Ly*np.linspace(-1, 1, n_grid)
         self.ax.plot(ip.argmin[0], ip.argmin[1], 'kx', ms=20, mew=5)
-        if config.get('opti', False):
+        if not config.get('opti', False):
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = (1/ip.normalization()) * ip.posterior(X, Y)
             cmap_posterior = plt.cm.get_cmap('binary')

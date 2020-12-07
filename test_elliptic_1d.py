@@ -14,7 +14,7 @@ solver_cbs = solvers.CbsSolver(
     parallel=True,
     adaptive=True,
     dirname=m.__name__,
-    opti=True)
+    opti=False)
 
 solver_cbo = solvers.CboSolver(
     dt=.1,
