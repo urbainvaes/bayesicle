@@ -63,8 +63,8 @@ if False:
 
 
 # Calculate preconditioner based on final iteration of EKS
-# data_file = "/solver_eks/model_elliptic_2d/preconditioner_eks.npy"
-data_file = "/solver_cbs/model_elliptic_2d/precond_non_extended.npy"
+data_file = "/solver_eks/model_elliptic_2d/preconditioner_eks.npy"
+# data_file = "/solver_cbs/model_elliptic_2d/precond_non_extended.npy"
 data = np.load(lib_misc.data_root + data_file, allow_pickle=True)[()]
 ensembles = data['ensembles']
 precond_vec = np.mean(ensembles, axis=0)
@@ -78,7 +78,7 @@ solver_md = solvers.MdSolver(
     sigma=1e-5,
     dt=.1,
     reg=True,
-    noise=True,
+    noise=False,
     parallel=True,
     adaptive=False,
     dt_min=1e-7,
