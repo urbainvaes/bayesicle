@@ -15,13 +15,13 @@ solver_cbs = solvers.CbsSolver(
     # beta=1,
     adaptive=True,
     dirname=m.__name__,
-    opti=False)
+    opti=True)
 
 solver_cbo = solvers.CboSolver(
     dt=.005,
     parallel=True,
-    adaptive=True,
-    beta=100,
+    adaptive=False,
+    beta=1000,
     lamda=1,
     sigma=.1,
     dirname=m.__name__,
@@ -42,15 +42,15 @@ plotter = m.Plotter(m.ip, show_weights=True, cutoff=500, opti=True,
                     contours=True, Lx=.01, Ly=.01, Lx_contours=5, Ly_contours=5)
 
 # Number of particles
-J = 10000
+J = 1000
 # ensembles_x = -1 + 1*np.random.randn(J)
 # ensembles_y = -1 + 1*np.random.randn(J)
-ensembles_x = 50*np.random.randn(J)
-ensembles_y = 50*np.random.randn(J)
+ensembles_x = 2*np.random.randn(J)
+ensembles_y = 2*np.random.randn(J)
 ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 # solver, plot_step = solver_eks, 10
-solver, plot_step = solver_cbs, 1
+solver, plot_step = solver_cbo, 100
 # solver, plot_step = solver_cbo, 1
 
 # Main loop
