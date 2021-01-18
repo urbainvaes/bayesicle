@@ -33,7 +33,6 @@ moments = m.ip.moments_posterior()
 print(mean, cov)
 print(moments)
 
-
 n_grid = 100
 x_plot = -3.7 + 2.7*np.linspace(0, 1, n_grid)
 y_plot = 102.5 + 3.5*np.linspace(0, 1, n_grid)

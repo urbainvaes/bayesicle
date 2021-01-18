@@ -24,7 +24,6 @@ simul = 'noise'
 fig_dir = lib_misc.fig_root + "/" + model
 os.makedirs(fig_dir, exist_ok=True)
 
-
 def get_ensembles(param_set):
     data_dir = "{}/{}/{}-{}-{}".format(lib_misc.data_root, solver, model, simul, param_set)
     data = np.load(data_dir + "/simulation-iteration-20000.npy", allow_pickle=True)[()]
