@@ -12,8 +12,8 @@ np.random.seed(0)
 solver_cbs = solvers.CbsSolver(
     dt=np.inf,
     parallel=True,
-    # beta=1,
-    adaptive=True,
+    beta=1,
+    adaptive=False,
     dirname=m.__name__,
     opti=True)
 
@@ -50,7 +50,7 @@ ensembles_y = 2*np.random.randn(J)
 ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
 # solver, plot_step = solver_eks, 10
-solver, plot_step = solver_cbo, 100
+solver, plot_step = solver_cbs, 1
 # solver, plot_step = solver_cbo, 1
 
 # Main loop

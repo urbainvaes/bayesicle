@@ -55,18 +55,20 @@ epsilon = .1
 def forward_constrained(u):
     return forward(u) + 1/epsilon * np.array([constraint(*u)**2])
 
-constraints = {
-        'eq_constraint': lambda x: constraint(*x),
-        'eq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
-        }
+# constraints = {
+#         'eq_constraint': lambda x: constraint(*x),
+#         'eq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
+#         }
 
 # constraints = {
 #         'ineq_constraint': lambda x: constraint(*x),
 #         'ineq_constraint_grad': lambda x: np.array(grad_constraint(*x)),
 #         }
 
-# constraints = {}
+constraints = {}
 
-ip = lib_inverse_problem.InverseProblem(forward_constrained, Γ, Σ, y,
+# ip = lib_inverse_problem.InverseProblem(forward_constrained, Γ, Σ, y,
+#                                         argmin=argmin, fmin=0, **constraints)
+ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y,
                                         argmin=argmin, fmin=0, **constraints)
 Plotter = lib_plotters.TwoDimPlotter
