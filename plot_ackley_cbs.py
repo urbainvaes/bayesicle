@@ -51,15 +51,16 @@ fig, ax = plt.subplots()
 for isimul in range(t.nsimul):
 # for isimul in range(5):
     wmean = get_wmean_trajectory(isimul, adaptive=True)
-    ax.plot(wmean[:, 0], wmean[:, 1], '.-')
+    ax.plot(wmean[:, 0], wmean[:, 1], 'k.-')
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$y$")
-n_grid = 100
+n_grid = 500
 x_plot = 5*np.linspace(-1, 1, n_grid)
 y_plot = 5*np.linspace(-1, 1, n_grid)
 X, Y = np.meshgrid(x_plot, y_plot)
 Z = m.op.objective_array(X, Y)
-ax.contourf(X, Y, Z, levels=100, cmap='jet')
+ax.contourf(X, Y, Z, levels=20, cmap='viridis')
+ax.contour(X, Y, Z, levels=20, colors='black')
 ax.set_xlim(-5, 5)
 plt.savefig("convergence_ackley.pdf")
 fig.show()
