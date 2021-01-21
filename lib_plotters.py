@@ -141,6 +141,7 @@ class TwoDimPlotter:
         x_plot = self.argmin[0] + self.Lx*np.linspace(-1, 1, n_grid)
         y_plot = self.argmin[1] + self.Ly*np.linspace(-1, 1, n_grid)
         self.ax.plot(ip.argmin[0], ip.argmin[1], 'kx', ms=20, mew=5)
+        self.mean = self.ax.plot([], [], 'bx', ms=20, mew=5)
         if not config.get('opti', False):
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = (1/ip.normalization()) * ip.posterior(X, Y)
@@ -191,6 +192,10 @@ class TwoDimPlotter:
         delta_x, delta_y = xmax - xmin, ymax - ymin
         self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
         self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
+        if data['solver'] == 'cbs':
+            xmean = np.sum(data['weights']*x_plot)
+            ymean = np.sum(data['weights']*y_plot)
+            self.mean[0].set_data([xmean], [ymean])
         if data['solver'] == 'cbs' and self.config.get('show_weights', True):
             title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
                      .format(data['beta'], data['ess'])

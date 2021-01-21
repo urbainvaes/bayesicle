@@ -3,7 +3,7 @@ import lib_inverse_problem
 import lib_plotters
 import sympy as sym
 
-a, b = 2.5, 2.5
+a, b = 0, 0
 
 
 def ackley_2d(x, y):
