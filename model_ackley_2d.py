@@ -1,5 +1,6 @@
 import numpy as np
 import lib_inverse_problem
+import lib_opti_problem
 import lib_plotters
 import sympy as sym
 
@@ -36,12 +37,6 @@ d, K = 2, 1
 # Data = lower bound
 y = np.array([0])
 
-# Covariance of noise and prior
-# γ, σ = 1, .5
-γ, σ = 1, 1000000
-Γ = np.diag([γ**2]*K)
-Σ = np.diag([σ**2]*d)
-
 # Constraint
 vx, vy = sym.symbols('x y', real=True)
 constraint = vx**2 + vy**2 - ((.9*a)**2 + (.9*b)**2)
@@ -69,6 +64,10 @@ constraints = {}
 
 # ip = lib_inverse_problem.InverseProblem(forward_constrained, Γ, Σ, y,
 #                                         argmin=argmin, fmin=0, **constraints)
-ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y,
-                                        argmin=argmin, fmin=0, **constraints)
+# ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y,
+#                                         argmin=argmin, fmin=0, **constraints)
+def objective(u):
+   return np.array(ackley_2d(*u))
+
+op = lib_opti_problem.OptimizationProblem(2, objective, argmin=argmin, fmin=0)
 Plotter = lib_plotters.TwoDimPlotter

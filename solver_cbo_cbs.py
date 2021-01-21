@@ -8,6 +8,9 @@ import numpy as np
 import scipy as sp
 import lib_misc
 
+import lib_inverse_problem
+import lib_opti_problem
+
 default_settings = {
         'verbose': False,
         'parallel': True,
@@ -29,9 +32,12 @@ class CbSolver:
         self.reg = opts.get('reg', True)
         self.verbose = opts.get('verbose', default_settings['verbose'])
 
-    def f_ensembles(self, ip, ensembles):
-        the_function = ip.reg_least_squares if self.reg \
-            else ip.least_squares
+    def f_ensembles(self, problem, ensembles):
+        if isinstance(problem, lib_inverse_problem.InverseProblem):
+            the_function = problem.reg_least_squares if self.reg \
+                else problem.least_squares
+        elif isinstance(problem, lib_opti_problem.OptimizationProblem):
+            the_function = problem.objective
 
         # Strange but seemingly necessary to avoid pickling issue? \_(")_/
         global function
@@ -63,7 +69,7 @@ class CbSolver:
                 my_print("ESS = {} too small, decreasing β to {}"
                          .format(ess, self.beta))
             elif self.adaptive and ess > int(self.frac_max*J):
-                self.beta *= 1.1
+                self.beta *= 1.1 if self.beta < 1e6 else 1
                 my_print("ESS = {} too large, increasing β to {}"
                          .format(ess, self.beta))
             else:
@@ -73,7 +79,7 @@ class CbSolver:
         weights = weights / np.sum(weights)
         return weights, ess
 
-    def step(self, ip, ensembles, filename=None):
+    def step(self, problem, ensembles, filename=None):
         raise NotImplementedError
 
 
@@ -94,23 +100,23 @@ class CbsSolver(CbSolver):
         self.data_dir = "{}/{}".format(data_root, dirname)
         os.makedirs(self.data_dir, exist_ok=True)
 
-    def step(self, ip, ensembles, filename=None):
+    def step(self, problem, ensembles, filename=None):
         J = ensembles.shape[0]
-        f_ensembles = self.f_ensembles(ip, ensembles)
+        f_ensembles = self.f_ensembles(problem, ensembles)
         weights, ess = self.calculate_weights(f_ensembles)
         mean = np.sum(ensembles*weights.reshape(J, 1), axis=0)
         diff = ensembles - mean
-        cov = [x.reshape(ip.d, 1) * x.reshape(1, ip.d) for x in diff]
+        cov = [x.reshape(problem.d, 1) * x.reshape(1, problem.d) for x in diff]
         cov = np.sum(np.array(cov) * weights.reshape(J, 1, 1), axis=0)
-        new_ensembles = np.zeros((J, ip.d))
+        new_ensembles = np.zeros((J, problem.d))
         coeff_noise = np.sqrt((1 - np.exp(-2*self.dt))/2) \
             * sp.linalg.sqrtm(2*cov*(1 if self.opti else (1+self.beta)))
-        if J <= ip.d:
+        if J <= problem.d:
             coeff_noise = np.real(coeff_noise)
         coeff_noise = np.real(coeff_noise)
         for j in range(J):
             new_ensembles[j] = mean + np.exp(-self.dt)*diff[j] \
-                               + coeff_noise.dot(np.random.randn(ip.d))
+                               + coeff_noise.dot(np.random.randn(problem.d))
 
         data = CbsIterationData(
             solver='cbs', opti=self.opti, ensembles=ensembles,
@@ -146,29 +152,29 @@ class CboSolver(CbSolver):
         # Constraint
         self.constraint_eps = opts.get('epsilon', .1)
 
-    def step(self, ip, ensembles, filename=None):
+    def step(self, problem, ensembles, filename=None):
         J = ensembles.shape[0]
-        f_ensembles = self.f_ensembles(ip, ensembles)
+        f_ensembles = self.f_ensembles(problem, ensembles)
         weights, ess = self.calculate_weights(f_ensembles)
         mean = np.sum(ensembles*weights.reshape(J, 1), axis=0)
         diff = ensembles - mean
-        new_ensembles = np.zeros((J, ip.d))
+        new_ensembles = np.zeros((J, problem.d))
 
         for j in range(J):
             new_ensembles[j] = ensembles[j] - self.lamda * self.dt*diff[j] \
-                + np.sqrt(self.dt)*self.sigma*diff[j]*np.random.randn(ip.d)
+                + np.sqrt(self.dt)*self.sigma*diff[j]*np.random.randn(problem.d)
 
-        if ip.eq_constraint is not None:
+        if problem.eq_constraint is not None:
             for i, _ in enumerate(new_ensembles):
                 new_ensembles[i] -= self.dt*(1/self.constraint_eps) \
-                                * ip.eq_constraint(ensembles[i]) \
-                                * ip.eq_constraint_grad(ensembles[i])
+                                * problem.eq_constraint(ensembles[i]) \
+                                * problem.eq_constraint_grad(ensembles[i])
 
-        if ip.ineq_constraint is not None:
+        if problem.ineq_constraint is not None:
             for i, _ in enumerate(new_ensembles):
                 new_ensembles[i] -= self.dt*(1/self.constraint_eps) \
-                                * max(ip.ineq_constraint(ensembles[i]), 0) \
-                                * ip.ineq_constraint_grad(ensembles[i])
+                                * max(problem.ineq_constraint(ensembles[i]), 0) \
+                                * problem.ineq_constraint_grad(ensembles[i])
 
         data = CboIterationData(
             solver='cbo', ensembles=ensembles, f_ensembles=f_ensembles,
