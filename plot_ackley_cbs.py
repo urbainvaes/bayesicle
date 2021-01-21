@@ -47,16 +47,27 @@ for isimul in range(t.nsimul):
 plt.savefig("convergence_ackley.pdf")
 fig.show()
 
+fig, ax = plt.subplots()
+for isimul in range(t.nsimul):
+# for isimul in range(5):
+    wmean = get_wmean_trajectory(isimul, adaptive=True)
+    ax.plot(wmean[:, 0], wmean[:, 1], '.-')
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"$y$")
+n_grid = 100
+x_plot = 5*np.linspace(-1, 1, n_grid)
+y_plot = 5*np.linspace(-1, 1, n_grid)
+X, Y = np.meshgrid(x_plot, y_plot)
+Z = m.op.objective_array(X, Y)
+ax.contourf(X, Y, Z, levels=100, cmap='jet')
+ax.set_xlim(-5, 5)
+plt.savefig("convergence_ackley.pdf")
+fig.show()
+
 # mean, cov = np.mean(ensembles, axis=0), np.cov(ensembles.T)
 # moments = m.ip.moments_posterior()
 # print(mean, cov)
 # print(moments)
-
-# n_grid = 100
-# x_plot = -3.7 + 2.7*np.linspace(0, 1, n_grid)
-# y_plot = 102.5 + 3.5*np.linspace(0, 1, n_grid)
-# X, Y = np.meshgrid(x_plot, y_plot)
-# Z = m.ip.least_squares_array(X, Y)
 
 # fig, [ax1, ax2, ax3] = plt.subplots(1, 3)
 # ax1.contour(X, Y, Z, levels=100, cmap='viridis')
