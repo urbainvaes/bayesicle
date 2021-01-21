@@ -28,11 +28,13 @@ if __name__ == "__main__":
         # Solvers
         solver_cbs = solvers.CbsSolver(
             dt=np.inf,
-            # dt=1,
+            # dt=.5,
             parallel=True,
             beta=beta,
             adaptive=True,
             dirname=m.__name__ + f"/adaptive-simulation-{isimul}",
+            # adaptive=False,
+            # dirname=m.__name__ + f"/simulation-{isimul}",
             opti=True)
 
         ensembles_x = 10*(np.random.randn() + np.random.randn(J))

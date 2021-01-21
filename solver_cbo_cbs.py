@@ -69,7 +69,7 @@ class CbSolver:
                 my_print("ESS = {} too small, decreasing β to {}"
                          .format(ess, self.beta))
             elif self.adaptive and ess > int(self.frac_max*J):
-                self.beta *= 1.1 if self.beta < 1e6 else 1
+                self.beta *= 1.1 if self.beta < 1e15 else 1
                 my_print("ESS = {} too large, increasing β to {}"
                          .format(ess, self.beta))
             else:

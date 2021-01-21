@@ -67,7 +67,7 @@ constraints = {}
 # ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y,
 #                                         argmin=argmin, fmin=0, **constraints)
 def objective(u):
-   return np.array(ackley_2d(*u))
+   return np.array(rastrigin_2d(*u))
 
 op = lib_opti_problem.OptimizationProblem(2, objective, argmin=argmin, fmin=0)
 Plotter = lib_plotters.TwoDimPlotter
