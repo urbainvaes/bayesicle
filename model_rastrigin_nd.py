@@ -4,7 +4,7 @@ import lib_opti_problem
 import lib_plotters
 import sympy as sym
 
-n = 10
+n = 2
 
 def rastrigin_nd(x):
     assert len(x) == n

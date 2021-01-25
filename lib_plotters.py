@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 import lib_inverse_problem
 import lib_opti_problem
 
-cmap = 'spring'
+# cmap = 'spring'
+# cmap = 'gray_r'
+cmap = 'jet'
 matplotlib.rc('image', cmap=cmap)
 
 
@@ -150,7 +152,7 @@ class TwoDimPlotter:
         x_plot = self.argmin[0] + self.Lx*np.linspace(-1, 1, n_grid)
         y_plot = self.argmin[1] + self.Ly*np.linspace(-1, 1, n_grid)
         self.ax.plot(ip.argmin[0], ip.argmin[1], 'kx', ms=20, mew=5)
-        self.mean = self.ax.plot([], [], 'bx', ms=20, mew=5)
+        self.mean = self.ax.plot([], [], 'rx', ms=20, mew=5)
         if not config.get('opti', False):
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = (1/ip.normalization()) * ip.posterior(X, Y)
@@ -163,7 +165,13 @@ class TwoDimPlotter:
             y_plot = self.argmin[1] + Ly_contour*np.linspace(-1, 1, n_grid)
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = ip.least_squares_array(X, Y)
-            self.ax.contour(X, Y, -np.log(Z), levels=100, cmap='viridis')
+            if isinstance(ip, lib_opti_problem.OptimizationProblem):
+                cont = self.ax.contourf(X, Y, Z, levels=100, cmap='terrain')
+                # self.ax.contour(X, Y, Z, levels=20, colors='black')
+                self.fig.colorbar(cont)
+            else:
+                cont = self.ax.contourf(X, Y, -np.log(Z), levels=100, cmap='viridis')
+                self.fig.colorbar(cont)
             constraint = None
             if ip.eq_constraint is not None:
                 constraint = ip.eq_constraint
@@ -172,7 +180,14 @@ class TwoDimPlotter:
             if constraint is not None:
                 Z = constraint((X, Y))
                 self.ax.contour(X, Y, Z, levels=[0])
-        self.scatter = self.ax.scatter([], [], cmap=cmap)
+        # self.scatter = self.ax.scatter([], [], cmap=cmap)
+        if config.get('show_weights', True):
+            kwargs = {'cmap': cmap}
+        else:
+            kwargs = {'c': 'yellow', 's': 12, 'edgecolors': 'red'}
+        self.scatter = self.ax.scatter([], [], **kwargs)
+        # cbar = self.fig.colorbar(self.scatter)
+        # cbar.set_ticks([])
         self.my_plot = self.ax.plot([], [], 'k')
         self.config = config
 
@@ -199,8 +214,8 @@ class TwoDimPlotter:
         ymin = min(self.argmin[1] - self.Ly, np.min(y_plot))
         ymax = max(self.argmin[1] + self.Ly, np.max(y_plot))
         delta_x, delta_y = xmax - xmin, ymax - ymin
-        self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
-        self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
+        # self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
+        # self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
         if data['solver'] == 'cbs':
             xmean = np.sum(data['weights']*x_plot)
             ymean = np.sum(data['weights']*y_plot)
@@ -227,9 +242,12 @@ class OneDimPlotter(object):
         self.fig, self.ax = plt.subplots()
         n_grid = 400
         x_plot = 6*np.linspace(-1, 1, n_grid)
-        # posterior = (1/ip.normalization()) * ip.posterior(x_plot)
-        # self.ax.plot(x_plot, posterior, label="Posterior")
-        # self.ax.plot(x_plot, -np.log(posterior), label=r"$\Phi_R$")
+        if isinstance(ip, lib_inverse_problem.InverseProblem):
+            posterior = (1/ip.normalization()) * ip.posterior(x_plot)
+            self.ax.plot(x_plot, posterior, label="Posterior")
+            self.ax.plot(x_plot, -np.log(posterior), label=r"$\Phi_R$")
+        elif isinstance(ip, lib_opti_problem.OptimizationProblem):
+            self.ax.plot(x_plot, ip.objective_array(x_plot), label=r"Objective function")
         self.my_plot = self.ax.plot(x_plot, 0*x_plot, ".-", label="CBS")[0]
         self.x_plot = x_plot
         self.ax.set_ylim(0, 2)
