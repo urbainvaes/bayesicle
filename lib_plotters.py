@@ -2,6 +2,8 @@ import numpy as np
 import scipy.stats
 import matplotlib
 import matplotlib.pyplot as plt
+import lib_inverse_problem
+import lib_opti_problem
 
 cmap = 'spring'
 matplotlib.rc('image', cmap=cmap)
@@ -17,7 +19,10 @@ def set_text(iteration, data, text):
 
 class AllCoeffsPlotter():
     def __init__(self, ip, **config):
-        self.u = ip.unknown
+        if isinstance(ip, lib_inverse_problem.InverseProblem):
+            self.u = ip.unknown
+        elif isinstance(ip, lib_opti_problem.OptimizationProblem):
+            self.u = ip.argmin
         self.show_weights = config.get('show_weights', False)
         self.show_text = config.get('show_text', True)
         self.fig, self.ax = plt.subplots()
@@ -50,7 +55,8 @@ class AllCoeffsPlotter():
             if data['solver'] == 'cbs' and self.show_weights:
                 my_cmap = plt.cm.get_cmap(cmap)
                 plot_args['c'] = my_cmap(data['weights'][i]/max_weights)
-            self.ax.plot(x_plot, u_i, '.', ms=15, **plot_args)
+            self.ax.plot(x_plot, u_i, '.', ms=10, **plot_args)
+        self.ax.plot(range(len(self.u)), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)
         for i in range(len(ensembles[0])):
             ens = ensembles[:, i]
             mean_dir = np.mean(ens)
@@ -72,7 +78,10 @@ class AllCoeffsPlotter():
 class MainModesPlotter:
 
     def __init__(self, ip, **config):
-        self.u = ip.unknown
+        if isinstance(ip, lib_inverse_problem.InverseProblem):
+            self.u = ip.unknown
+        elif isinstance(ip, lib_opti_problem.OptimizationProblem):
+            self.u = ip.argmin
         self.coeffs = config.get('coeffs', [0, 1, 2])
         self.show_weights = config.get('show_weights', True)
         c0, c1, c2 = self.coeffs
@@ -214,12 +223,12 @@ class TwoDimPlotter:
 
 class OneDimPlotter(object):
 
-    def __init__(self, ip):
+    def __init__(self, ip, **config):
         self.fig, self.ax = plt.subplots()
         n_grid = 400
         x_plot = 6*np.linspace(-1, 1, n_grid)
-        posterior = (1/ip.normalization()) * ip.posterior(x_plot)
-        self.ax.plot(x_plot, posterior, label="Posterior")
+        # posterior = (1/ip.normalization()) * ip.posterior(x_plot)
+        # self.ax.plot(x_plot, posterior, label="Posterior")
         # self.ax.plot(x_plot, -np.log(posterior), label=r"$\Phi_R$")
         self.my_plot = self.ax.plot(x_plot, 0*x_plot, ".-", label="CBS")[0]
         self.x_plot = x_plot
