@@ -1,43 +1,37 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy.linalg as la
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 # Forward model and solver
 import model_elliptic_1d as m
 import solvers
 
+matplotlib.rc('font', size=20)
+matplotlib.rc('font', family='serif')
+matplotlib.rc('text', usetex=True)
+matplotlib.rc('figure', figsize=(14, 8))
+matplotlib.rc('savefig', bbox='tight')
+matplotlib.rc('figure.subplot', hspace=.0)
+matplotlib.rc('figure.subplot', wspace=.03)
+
 # Solvers
+α = .9
 solver_cbs = solvers.CbsSolver(
-    dt=1,
+    dt=-np.log(α),
     # frac_min=50/100,
     # frac_max=55/100,
     parallel=True,
-    beta=1,
+    beta=.5,
     adaptive=False,
     dirname=m.__name__,
     opti=False)
 
-solver_cbo = solvers.CboSolver(
-    dt=.1,
-    parallel=True,
-    adaptive=True,
-    beta=1,
-    lamda=1,
-    sigma=.1,
-    dirname=m.__name__)
-
-solver_eks = solvers.EksSolver(
-    dt=1,
-    reg=True,
-    noise=True,
-    parallel=True,
-    adaptive=True,
-    dirname=m.__name__)
-
 if __name__ == "__main__":
 
     # Plots
-    plotter = m.Plotter(m.ip, show_weights=True,
+    plotter = m.Plotter(m.ip, show_weights=True, adapt_size=True,
                         contours=True, Lx=1, Ly=1, Lx_contours=5, Ly_contours=40)
 
     # Number of particles
@@ -48,12 +42,13 @@ if __name__ == "__main__":
     ensembles_y = 90 + 20*np.random.rand(J)
     ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
-    n_iter_precond = 500
-    for i in range(n_iter_precond):
+    def update(i):
+        global ensembles
+        print("Iteration {:04d}".format(i))
         data = solver_cbs.step(m.ip, ensembles,
                                filename="iteration-{:04d}.npy".format(i))
         ensembles = data.new_ensembles
         plotter.plot(i, data._asdict())
-        if i % 1 == 0:
-            plt.pause(1)
-            plt.draw()
+    anim = animation.FuncAnimation(plotter.fig, update, 30, init_func=lambda: None, repeat=False)
+    writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
+    anim.save(f'{m.__name__}_α={α}.webm', writer=writer, dpi=500)

@@ -34,9 +34,9 @@ class AllCoeffsPlotter():
     def set_text(self, iteration, data):
         if not self.show_text:
             return
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        props = dict(boxstyle='round', facecolor='cyan', alpha=0.5)
         text = self.ax.text(
-            .03, .98, "Ready", fontsize=18, bbox=props,
+            .02, .98, "Ready", fontsize=18, bbox=props,
             horizontalalignment='left', verticalalignment='top',
             transform=self.ax.transAxes)
         set_text(iteration, data, text)
@@ -161,8 +161,11 @@ class TwoDimPlotter:
         if config.get('contours', True):
             Lx_contour = config.get('Lx_contours', 1)
             Ly_contour = config.get('Ly_contours', 1)
-            x_plot = self.argmin[0] + Lx_contour*np.linspace(-1, 1, n_grid)
-            y_plot = self.argmin[1] + Ly_contour*np.linspace(-1, 1, n_grid)
+            relative = config.get('relative', True)
+            addx = self.argmin[0] if relative else 0
+            addy = self.argmin[1] if relative else 0
+            x_plot = addx + Lx_contour*np.linspace(-1, 1, n_grid)
+            y_plot = addy + Ly_contour*np.linspace(-1, 1, n_grid)
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = ip.least_squares_array(X, Y)
             if isinstance(ip, lib_opti_problem.OptimizationProblem):
@@ -170,7 +173,7 @@ class TwoDimPlotter:
                 # self.ax.contour(X, Y, Z, levels=20, colors='black')
                 self.fig.colorbar(cont)
             else:
-                cont = self.ax.contourf(X, Y, -np.log(Z), levels=100, cmap='viridis')
+                cont = self.ax.contour(X, Y, -np.log(Z), levels=100, cmap='viridis')
                 self.fig.colorbar(cont)
             constraint = None
             if ip.eq_constraint is not None:
@@ -192,14 +195,15 @@ class TwoDimPlotter:
         self.config = config
 
         # Text on plot
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        props = dict(boxstyle='round', facecolor='cyan', alpha=0.9)
         self.text = self.ax.text(
-            .03, .98, "Ready", fontsize=18, bbox=props,
+            .02, .98, "Ready", fontsize=18, bbox=props,
             horizontalalignment='left', verticalalignment='top',
             transform=self.ax.transAxes)
 
     def plot(self, iteration, data):
         title = "Iteration {}".format(iteration)
+        title = ""
         ensembles = data['ensembles']
         if data['solver'] == 'md':
             cutoff = self.config.get('cutoff', 10**10)
@@ -209,20 +213,22 @@ class TwoDimPlotter:
             return
         self.scatter.set_offsets(ensembles)
         x_plot, y_plot = ensembles[:, 0], ensembles[:, 1]
+        relative = self.config.get('relative', True)
         xmin = min(self.argmin[0] - self.Lx, np.min(x_plot))
         xmax = max(self.argmin[0] + self.Lx, np.max(x_plot))
         ymin = min(self.argmin[1] - self.Ly, np.min(y_plot))
         ymax = max(self.argmin[1] + self.Ly, np.max(y_plot))
         delta_x, delta_y = xmax - xmin, ymax - ymin
-        # self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
-        # self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
+        if self.config.get('adapt_size', False):
+            self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
+            self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
         if data['solver'] == 'cbs':
             xmean = np.sum(data['weights']*x_plot)
             ymean = np.sum(data['weights']*y_plot)
             self.mean[0].set_data([xmean], [ymean])
         if data['solver'] == 'cbs' and self.config.get('show_weights', True):
-            title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
-                     .format(data['beta'], data['ess'])
+            # title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
+            #          .format(data['beta'], data['ess'])
             self.scatter.set_array(data['weights'])
             sizes = 5 + 40*data['weights']/np.max(data['weights'])
             self.scatter.set_sizes(sizes)

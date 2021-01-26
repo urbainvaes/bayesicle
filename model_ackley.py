@@ -4,8 +4,9 @@ import lib_opti_problem
 import lib_plotters
 import sympy as sym
 
-a, b = 0, 0
-
+n = 2
+shift = 2
+a, b = shift, shift
 
 def ackley_2d(x, y):
     return -20*np.exp(-0.2*np.sqrt(0.5*(np.power(x-a, 2)+np.power(y-b, 2)))) \
