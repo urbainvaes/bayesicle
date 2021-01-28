@@ -16,7 +16,7 @@ matplotlib.rc('figure.subplot', hspace=.0)
 matplotlib.rc('figure.subplot', wspace=.03)
 
 # Set seed to zero
-np.random.seed(0)
+np.random.seed(5)
 
 # Number of particles
 J = 100
@@ -34,6 +34,7 @@ if __name__ == "__main__":
 
     # Solvers
     α = .9
+    α = .000000001
     dt = - np.log(α)
     solver_cbs = solvers.CbsSolver(
         dt=dt,
@@ -51,11 +52,8 @@ if __name__ == "__main__":
     solver, plot_step = solver_cbs, 5
 
     vec = L*np.ones(m.n)
-    ensembles = -vec + 2*vec*np.random.rand(J, m.n)
-
-    nsimul, nsteps = 100, 10
-    for i in range(nsimul):
-        for j in range(n
+    # ensembles = -vec + 2*vec*np.random.rand(J, m.n)
+    ensembles = 5*np.random.rand(J, m.n)
 
     def update(i):
         global ensembles
@@ -64,12 +62,12 @@ if __name__ == "__main__":
             data = solver.step(m.op, ensembles,
                    filename="iteration-{:04d}.npy".format(i))
             ensembles = data.new_ensembles
-        # plotter.plot(plot_step*i, data._asdict())
-        # if i % plot_step == 0:
-        #     plt.pause(1)
-        #     plt.draw()
+        plotter.plot(plot_step*i, data._asdict())
+        if i % plot_step == 0:
+            plt.pause(1)
+            plt.draw()
 
     anim = animation.FuncAnimation(plotter.fig, update, 120, init_func=lambda: None, repeat=False)
     plt.show()
-    writer = animation.writers['ffmpeg'](fps=4, bitrate=500, codec='libvpx-vp9')
-    anim.save(f'{m.__name__}_{m.n}d_α={α}.webm', writer=writer, dpi=500)
+    # writer = animation.writers['ffmpeg'](fps=4, bitrate=500, codec='libvpx-vp9')
+    # anim.save(f'{m.__name__}_{m.n}d_α={α}.webm', writer=writer, dpi=500)

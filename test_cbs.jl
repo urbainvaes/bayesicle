@@ -4,14 +4,13 @@ import Statistics
 
 shift = length(ARGS) > 0 ? parse(Int, ARGS[1]) : 2;
 fun = length(ARGS) > 1 ? ARGS[2] : "rastrigin";
-
-n = 10;
-rootpow = 1;
+n = length(ARGS) > 2 ? parse(Int, ARGS[3]) : 10;
 exact = shift * ones(n, 1);
 
 function rastrigin(x)
     A = 10
     result = A*n
+    rootpow = 1
     for i in 1:n
         z = rootpow^i * (x[i] - shift)
         result += z^2 - A*cos(2π*z)
@@ -134,7 +133,7 @@ function run_simulation(alpha, J)
         mean_error = "-"
     end
     # println("J=$J, d=$n, α=$alpha, b=$shift, Success rate: $success_rate, mean niter: $mean_niter, mean error: $mean_error");
-    println("\$ $success_rate \\% \\,|\\, $mean_niter \\,|\\, $mean_error \$          J=$J, d=$n, α=$alpha, b=$shift");
+    println("& \$ $success_rate \\% \\,|\\, $mean_niter \\,|\\, $mean_error \$          J=$J, d=$n, α=$alpha, b=$shift");
 end
 
 alphas = [0, .5]
