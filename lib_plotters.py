@@ -2,8 +2,12 @@ import numpy as np
 import scipy.stats
 import matplotlib
 import matplotlib.pyplot as plt
+import lib_inverse_problem
+import lib_opti_problem
 
-cmap = 'spring'
+# cmap = 'spring'
+# cmap = 'gray_r'
+cmap = 'jet'
 matplotlib.rc('image', cmap=cmap)
 
 
@@ -17,7 +21,10 @@ def set_text(iteration, data, text):
 
 class AllCoeffsPlotter():
     def __init__(self, ip, **config):
-        self.u = ip.unknown
+        if isinstance(ip, lib_inverse_problem.InverseProblem):
+            self.u = ip.unknown
+        elif isinstance(ip, lib_opti_problem.OptimizationProblem):
+            self.u = ip.argmin
         self.show_weights = config.get('show_weights', False)
         self.show_text = config.get('show_text', True)
         self.fig, self.ax = plt.subplots()
@@ -27,9 +34,9 @@ class AllCoeffsPlotter():
     def set_text(self, iteration, data):
         if not self.show_text:
             return
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        props = dict(boxstyle='round', facecolor='cyan', alpha=0.5)
         text = self.ax.text(
-            .03, .98, "Ready", fontsize=18, bbox=props,
+            .02, .98, "Ready", fontsize=18, bbox=props,
             horizontalalignment='left', verticalalignment='top',
             transform=self.ax.transAxes)
         set_text(iteration, data, text)
@@ -50,7 +57,8 @@ class AllCoeffsPlotter():
             if data['solver'] == 'cbs' and self.show_weights:
                 my_cmap = plt.cm.get_cmap(cmap)
                 plot_args['c'] = my_cmap(data['weights'][i]/max_weights)
-            self.ax.plot(x_plot, u_i, '.', ms=15, **plot_args)
+            self.ax.plot(x_plot, u_i, '.', ms=10, **plot_args)
+        self.ax.plot(range(len(self.u)), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)
         for i in range(len(ensembles[0])):
             ens = ensembles[:, i]
             mean_dir = np.mean(ens)
@@ -72,7 +80,10 @@ class AllCoeffsPlotter():
 class MainModesPlotter:
 
     def __init__(self, ip, **config):
-        self.u = ip.unknown
+        if isinstance(ip, lib_inverse_problem.InverseProblem):
+            self.u = ip.unknown
+        elif isinstance(ip, lib_opti_problem.OptimizationProblem):
+            self.u = ip.argmin
         self.coeffs = config.get('coeffs', [0, 1, 2])
         self.show_weights = config.get('show_weights', True)
         c0, c1, c2 = self.coeffs
@@ -141,6 +152,9 @@ class TwoDimPlotter:
         x_plot = self.argmin[0] + self.Lx*np.linspace(-1, 1, n_grid)
         y_plot = self.argmin[1] + self.Ly*np.linspace(-1, 1, n_grid)
         self.ax.plot(ip.argmin[0], ip.argmin[1], 'kx', ms=20, mew=5)
+        # self.ax.set_xlabel('$x$')
+        # self.ax.set_ylabel('$y$')
+        self.mean = self.ax.plot([], [], 'rx', ms=20, mew=5)
         if not config.get('opti', False):
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = (1/ip.normalization()) * ip.posterior(X, Y)
@@ -149,11 +163,21 @@ class TwoDimPlotter:
         if config.get('contours', True):
             Lx_contour = config.get('Lx_contours', 1)
             Ly_contour = config.get('Ly_contours', 1)
-            x_plot = self.argmin[0] + Lx_contour*np.linspace(-1, 1, n_grid)
-            y_plot = self.argmin[1] + Ly_contour*np.linspace(-1, 1, n_grid)
+            relative = config.get('relative', True)
+            addx = self.argmin[0] if relative else 0
+            addy = self.argmin[1] if relative else 0
+            x_plot = addx + Lx_contour*np.linspace(-1, 1, n_grid)
+            y_plot = addy + Ly_contour*np.linspace(-1, 1, n_grid)
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = ip.least_squares_array(X, Y)
-            self.ax.contour(X, Y, -np.log(Z), levels=100, cmap='viridis')
+            if isinstance(ip, lib_opti_problem.OptimizationProblem):
+                cont = self.ax.contourf(X, Y, Z, levels=100, cmap='terrain')
+                # self.ax.contour(X, Y, Z, levels=20, colors='black')
+                # self.fig.colorbar(cont, orientation="horizontal")
+                # self.fig.colorbar(cont)
+            else:
+                cont = self.ax.contour(X, Y, -np.log(Z), levels=100, cmap='viridis')
+                self.fig.colorbar(cont)
             constraint = None
             if ip.eq_constraint is not None:
                 constraint = ip.eq_constraint
@@ -162,19 +186,27 @@ class TwoDimPlotter:
             if constraint is not None:
                 Z = constraint((X, Y))
                 self.ax.contour(X, Y, Z, levels=[0])
-        self.scatter = self.ax.scatter([], [], cmap=cmap)
+        # self.scatter = self.ax.scatter([], [], cmap=cmap)
+        if config.get('show_weights', True):
+            kwargs = {'cmap': cmap}
+        else:
+            kwargs = {'c': 'red', 's': 30, 'edgecolors': 'black'}
+        self.scatter = self.ax.scatter([], [], **kwargs)
+        # cbar = self.fig.colorbar(self.scatter)
+        # cbar.set_ticks([])
         self.my_plot = self.ax.plot([], [], 'k')
         self.config = config
 
         # Text on plot
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        props = dict(boxstyle='round', facecolor='cyan', alpha=0.9)
         self.text = self.ax.text(
-            .03, .98, "Ready", fontsize=18, bbox=props,
+            .02, .98, "Ready", fontsize=18, bbox=props,
             horizontalalignment='left', verticalalignment='top',
             transform=self.ax.transAxes)
 
     def plot(self, iteration, data):
         title = "Iteration {}".format(iteration)
+        title = ""
         ensembles = data['ensembles']
         if data['solver'] == 'md':
             cutoff = self.config.get('cutoff', 10**10)
@@ -184,16 +216,24 @@ class TwoDimPlotter:
             return
         self.scatter.set_offsets(ensembles)
         x_plot, y_plot = ensembles[:, 0], ensembles[:, 1]
+        relative = self.config.get('relative', True)
         xmin = min(self.argmin[0] - self.Lx, np.min(x_plot))
         xmax = max(self.argmin[0] + self.Lx, np.max(x_plot))
         ymin = min(self.argmin[1] - self.Ly, np.min(y_plot))
         ymax = max(self.argmin[1] + self.Ly, np.max(y_plot))
         delta_x, delta_y = xmax - xmin, ymax - ymin
-        self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
-        self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
+        if self.config.get('adapt_size', False):
+            self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
+            self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
+        if data['solver'] == 'cbs':
+            # xmean = np.sum(data['weights']*x_plot)
+            # ymean = np.sum(data['weights']*y_plot)
+            xmean = np.mean(x_plot)
+            ymean = np.mean(y_plot)
+            self.mean[0].set_data([xmean], [ymean])
         if data['solver'] == 'cbs' and self.config.get('show_weights', True):
-            title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
-                     .format(data['beta'], data['ess'])
+            # title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
+            #          .format(data['beta'], data['ess'])
             self.scatter.set_array(data['weights'])
             sizes = 5 + 40*data['weights']/np.max(data['weights'])
             self.scatter.set_sizes(sizes)
@@ -209,13 +249,16 @@ class TwoDimPlotter:
 
 class OneDimPlotter(object):
 
-    def __init__(self, ip):
+    def __init__(self, ip, **config):
         self.fig, self.ax = plt.subplots()
         n_grid = 400
         x_plot = 6*np.linspace(-1, 1, n_grid)
-        posterior = (1/ip.normalization()) * ip.posterior(x_plot)
-        self.ax.plot(x_plot, posterior, label="Posterior")
-        # self.ax.plot(x_plot, -np.log(posterior), label=r"$\Phi_R$")
+        if isinstance(ip, lib_inverse_problem.InverseProblem):
+            posterior = (1/ip.normalization()) * ip.posterior(x_plot)
+            self.ax.plot(x_plot, posterior, label="Posterior")
+            self.ax.plot(x_plot, -np.log(posterior), label=r"$\Phi_R$")
+        elif isinstance(ip, lib_opti_problem.OptimizationProblem):
+            self.ax.plot(x_plot, ip.objective_array(x_plot), label=r"Objective function")
         self.my_plot = self.ax.plot(x_plot, 0*x_plot, ".-", label="CBS")[0]
         self.x_plot = x_plot
         self.ax.set_ylim(0, 2)
