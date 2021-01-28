@@ -2,9 +2,9 @@
 import Random
 import Statistics
 
-shift = length(ARGS) > 0 ? parse(Int, ARGS[1]) : 2;
-fun = length(ARGS) > 1 ? ARGS[2] : "rastrigin";
-n = length(ARGS) > 2 ? parse(Int, ARGS[3]) : 10;
+shift = length(ARGS) > 0 ? parse(Int, ARGS[1]) : 0;
+fun = length(ARGS) > 1 ? ARGS[2] : "ackley";
+n = length(ARGS) > 2 ? parse(Int, ARGS[3]) : 2;
 exact = shift * ones(n, 1);
 
 function rastrigin(x)
@@ -43,7 +43,7 @@ function find_beta(fensembles, ess)
         weights = exp.(- β*fensembles)
         return sum(weights)^2/sum(weights.^2)/J
     end
-    β1, β2 = 0, 1e15
+    β1, β2 = 0, 1e20
     β, e = β2, get_ess(β2)
     if e > ess
         println("Can't find β")
@@ -93,7 +93,7 @@ function run_simulation(alpha, J)
     Random.seed!(0);
     beta = 1
     opti = true
-    adaptive = true
+    adaptive = false
     ess = 1/2.
     config = CbsConfig(alpha, beta, opti, adaptive, ess)
 
@@ -136,8 +136,8 @@ function run_simulation(alpha, J)
     println("& \$ $success_rate \\% \\,|\\, $mean_niter \\,|\\, $mean_error \$          J=$J, d=$n, α=$alpha, b=$shift");
 end
 
-alphas = [0, .5]
-Js = [100, 500, 1000]
+alphas = [0, .5, .9]
+Js = [50, 100, 200]
 
 for alpha in alphas
     for J in Js

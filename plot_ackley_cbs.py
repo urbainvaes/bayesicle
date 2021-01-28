@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import scipy.stats
 
-import model_ackley_2d as m
+import model_ackley as m
 import test_ackley_cbs as t
 import lib_misc
 
