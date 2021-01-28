@@ -49,6 +49,7 @@ if __name__ == "__main__":
                                filename="iteration-{:04d}.npy".format(i))
         ensembles = data.new_ensembles
         plotter.plot(i, data._asdict())
-    anim = animation.FuncAnimation(plotter.fig, update, 30, init_func=lambda: None, repeat=False)
-    writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
-    anim.save(f'{m.__name__}_α={α}.webm', writer=writer, dpi=500)
+    anim = animation.FuncAnimation(plotter.fig, update, 80, init_func=lambda: None, repeat=False)
+    plt.show()
+    # writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
+    # anim.save(f'{m.__name__}_α={α}.webm', writer=writer, dpi=500)
