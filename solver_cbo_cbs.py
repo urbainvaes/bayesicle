@@ -27,8 +27,7 @@ class CbSolver:
         self.adaptive = opts.get('adaptive', False)
         self.beta = opts.get('beta', default_settings['beta'])  # Last β
         self.parallel = opts.get('parallel', default_settings['parallel'])
-        self.frac_min = opts.get('frac_min', 1/5)
-        self.frac_max = opts.get('frac_max', 1/2)
+        self.ess = opts.get('ess', 1/2)
         self.reg = opts.get('reg', True)
         self.verbose = opts.get('verbose', default_settings['verbose'])
 
@@ -54,30 +53,33 @@ class CbSolver:
             f_ensembles = np.array([function(u) for u in ensembles])
         return f_ensembles
 
-    def calculate_weights(self, f_ensembles):
-        J = len(f_ensembles)
-        n_iter_max = 1000
-        # This helps to avoid numerical issues
-        f_ensembles = f_ensembles - np.min(f_ensembles)
-        for _ in range(n_iter_max):
-            weights = np.exp(- self.beta * f_ensembles)
-            sum_ess = np.sum(weights**2)
-            ess = 0 if sum_ess == 0 else np.sum(weights)**2/sum_ess
-            my_print = print if self.verbose else lambda s: None
-            if self.adaptive and ess < int(self.frac_min*J):
-                self.beta /= 1.1
-                my_print("ESS = {} too small, decreasing β to {}"
-                         .format(ess, self.beta))
-            elif self.adaptive and ess > int(self.frac_max*J):
-                self.beta *= 1.1 if self.beta < 1e15 else 1
-                my_print("ESS = {} too large, increasing β to {}"
-                         .format(ess, self.beta))
-            else:
-                break
+    def calculate_weights(self, fensembles):
+        J = len(fensembles)
+        fensembles = fensembles - np.min(fensembles)
+
+        def get_ess(β):
+            weights = np.exp(- β*fensembles)
+            return weights, np.sum(weights)**2/np.sum(weights**2)/J
+
+        if self.adaptive:
+            β1, β2 = 0, 1e20
+            β = β2
+            weights, ess = get_ess(β2)
+            if ess > self.ess:
+                print("Can't find β")
+                return β
+
+            while abs(ess - self.ess) > 1e-3:
+                β = (β1 + β2)/2
+                weights, ess = get_ess(β)
+                if ess > self.ess:
+                    β1 = β
+                else:
+                    β2 = β
+            self.beta = β
         else:
-            print("Could not find suitable β")
-        weights = weights / np.sum(weights)
-        return weights, ess
+            weights, ess = get_ess(self.beta)
+        return weights / np.sum(weights), ess
 
     def step(self, problem, ensembles, filename=None):
         raise NotImplementedError

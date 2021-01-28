@@ -152,6 +152,8 @@ class TwoDimPlotter:
         x_plot = self.argmin[0] + self.Lx*np.linspace(-1, 1, n_grid)
         y_plot = self.argmin[1] + self.Ly*np.linspace(-1, 1, n_grid)
         self.ax.plot(ip.argmin[0], ip.argmin[1], 'kx', ms=20, mew=5)
+        # self.ax.set_xlabel('$x$')
+        # self.ax.set_ylabel('$y$')
         self.mean = self.ax.plot([], [], 'rx', ms=20, mew=5)
         if not config.get('opti', False):
             X, Y = np.meshgrid(x_plot, y_plot)
@@ -171,7 +173,8 @@ class TwoDimPlotter:
             if isinstance(ip, lib_opti_problem.OptimizationProblem):
                 cont = self.ax.contourf(X, Y, Z, levels=100, cmap='terrain')
                 # self.ax.contour(X, Y, Z, levels=20, colors='black')
-                self.fig.colorbar(cont)
+                # self.fig.colorbar(cont, orientation="horizontal")
+                # self.fig.colorbar(cont)
             else:
                 cont = self.ax.contour(X, Y, -np.log(Z), levels=100, cmap='viridis')
                 self.fig.colorbar(cont)
@@ -187,7 +190,7 @@ class TwoDimPlotter:
         if config.get('show_weights', True):
             kwargs = {'cmap': cmap}
         else:
-            kwargs = {'c': 'yellow', 's': 12, 'edgecolors': 'red'}
+            kwargs = {'c': 'red', 's': 30, 'edgecolors': 'black'}
         self.scatter = self.ax.scatter([], [], **kwargs)
         # cbar = self.fig.colorbar(self.scatter)
         # cbar.set_ticks([])
@@ -223,8 +226,10 @@ class TwoDimPlotter:
             self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
             self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
         if data['solver'] == 'cbs':
-            xmean = np.sum(data['weights']*x_plot)
-            ymean = np.sum(data['weights']*y_plot)
+            # xmean = np.sum(data['weights']*x_plot)
+            # ymean = np.sum(data['weights']*y_plot)
+            xmean = np.mean(x_plot)
+            ymean = np.mean(y_plot)
             self.mean[0].set_data([xmean], [ymean])
         if data['solver'] == 'cbs' and self.config.get('show_weights', True):
             # title += r": $\beta = {:.3f}$, ESS = {:.2f}"\

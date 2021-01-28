@@ -4,7 +4,7 @@ import lib_opti_problem
 import lib_plotters
 import sympy as sym
 
-n = 10
+n = 2
 shift = 2
 rootpow = 1
 

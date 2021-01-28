@@ -26,7 +26,7 @@ fig_dir = lib_misc.fig_root + "/" + model
 os.makedirs(fig_dir, exist_ok=True)
 
 data_dir = "{}/{}/{}".format(lib_misc.data_root, solver, model)
-ensembles = np.load(data_dir + "/iteration-0100.npy", allow_pickle=True)[()]['ensembles']
+ensembles = np.load(data_dir + "/iteration-0200.npy", allow_pickle=True)[()]['ensembles']
 
 mean, cov = np.mean(ensembles, axis=0), np.cov(ensembles.T)
 moments = m.ip.moments_posterior()
@@ -55,5 +55,6 @@ ax3.contourf(X, Y, Z_post, cmap='binary')
 ax3.set_xticks([])
 ax3.set_yticks([])
 
+print(fig_dir + '/posterior_cbs.pdf')
 fig.savefig(fig_dir + '/posterior_cbs.pdf')
 plt.show()
