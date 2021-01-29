@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 import solvers
-# import model_rastrigin as m
-import model_ackley as m
+import model_rastrigin as m
+# import model_ackley as m
 
 matplotlib.rc('font', size=24)
 matplotlib.rc('font', family='serif')
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         ensembles = data.new_ensembles
         plotter.plot(i, data._asdict())
         plt.savefig(f"figures/{m.__name__}_iteration-{i}.png")
-        # plt.pause(1)
+        # plt.pause(.1)
         # plt.draw()
 
     # def update(i):
