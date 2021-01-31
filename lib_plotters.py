@@ -14,7 +14,7 @@ matplotlib.rc('image', cmap=cmap)
 def set_text(iteration, data, text):
     the_text = "Iteration {}".format(iteration)
     if data['solver'] == 'cbs':
-        the_text += "\n $\\beta = {:.3f}$\n ESS = {:.2f}/{}"\
+        the_text += "\n $\\beta = {:.3f}$\n $J_{{\\rm eff}}/J = {:.4f}$"\
                     .format(data['beta'], data['ess'], len(data['weights']))
     text.set_text(the_text)
 
