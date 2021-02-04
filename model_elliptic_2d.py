@@ -33,7 +33,7 @@ class ForwardDarcy():
 
         indices = [(m, n) for m in range(0, N) for n in range(0, N)]
         # indices = indices[:-1]
-        self.indices = sorted(indices, key=sum)
+        self.indices = sorted(indices, key=max)
         eig_f = [sym.cos(i[0]*sym.pi*x) * sym.cos(i[1]*sym.pi*y)
                  for i in self.indices]
 
@@ -97,13 +97,13 @@ class ForwardDarcy():
 
 # Test code {{{1
 # ==============
-if __name__ == "__main__":
-    G = ForwardDarcy(4, 10)
-    u_truth = np.random.randn(len(G.indices))
-    solution = G(u_truth, return_sol=True)
-    p = fen.plot(solution)
-    plt.colorbar(p)
-    plt.show()
+# if __name__ == "__main__":
+#     G = ForwardDarcy(4, 10)
+#     u_truth = np.random.randn(len(G.indices))
+#     solution = G(u_truth, return_sol=True)
+#     p = fen.plot(solution)
+#     plt.colorbar(p)
+#     plt.show()
 
 # Parameters of the inverse problem {{{1
 # ======================================
@@ -123,7 +123,7 @@ u = σ*np.random.randn(len(G.indices))
 forward = G.__call__
 
 # For non-extended state space / no model misspecification
-# u[9:] = 0
+u[9:] = 0
 
 # Observation without noise
 y = forward(u)
