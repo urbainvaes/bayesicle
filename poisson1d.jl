@@ -196,9 +196,11 @@ ensembles = 3*Random.randn(d, J)
 distance, spread, niter = 10, 1, 0
 while spread > 1e-12
     mean = Statistics.mean(ensembles, dims=2)
-    distance = la.norm(mean - utruth)
+    cov = Statistics.cov(ensembles, dims=2)
+    inv_cov = la.inv(cov)
+    weighted_distance = sqrt((utruth - mean)' * (inv_cov * (utruth - mean)))
     spread = sqrt(sum(abs2, Statistics.cov(ensembles, dims=2)))
-    println("Spread = $spread, Error=$distance")
+    println("Spread = $spread, Error=$weighted_distance")
     ensembles = cbs_step(objective, config, ensembles)
     niter += 1
 end
