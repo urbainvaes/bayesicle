@@ -1,4 +1,5 @@
 import re
+import os
 import glob
 import numpy as np
 import matplotlib
@@ -24,9 +25,11 @@ model = m.__name__
 # Directory of the data
 data_dir = "{}/{}/{}".format(lib_misc.data_root, solver, model)
 fig_dir = lib_misc.fig_root + "/" + model
+os.makedirs(fig_dir, exist_ok=True)
 
 # MD maximum a posteriori estimate
-u_md = np.load("{}/{}".format(data_dir, "iteration-0100-md.npy"), allow_pickle=True)[()]
+u_md = np.load("{}/{}".format(data_dir, "iteration-0100-md-nonextended.npy"), allow_pickle=True)[()]
+u_md = np.load("{}/{}".format(data_dir, "iteration-0100-md-extended.npy"), allow_pickle=True)[()]
 u_md = u_md['theta']
 
 # Truth
@@ -54,6 +57,12 @@ ax[1].set_xlabel('$x_0$')
 ax[0].set_ylabel('$x_1$')
 fig.savefig(fig_dir + '/log_permeability.pdf')
 plt.show()
+
+λs = np.asarray(G.eig_v[:9], dtype=float)
+norm1 = np.linalg.norm(u_truth[:9])
+error1 = np.linalg.norm(u_md - u_truth[:9]) / norm1
+norm2 = np.linalg.norm(u_truth[:9]*np.sqrt(λs))
+error2 = np.linalg.norm((u_md - u_truth[:9])*np.sqrt(λs)) / norm2
 
 # Plot (Sampling)
 data_file = "simulation-iteration-1000-extended.npy"

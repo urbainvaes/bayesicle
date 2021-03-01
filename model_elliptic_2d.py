@@ -33,12 +33,12 @@ class ForwardDarcy():
 
         indices = [(m, n) for m in range(0, N) for n in range(0, N)]
         # indices = indices[:-1]
-        self.indices = sorted(indices, key=sum)
+        self.indices = sorted(indices, key=max)
         eig_f = [sym.cos(i[0]*sym.pi*x) * sym.cos(i[1]*sym.pi*y)
                  for i in self.indices]
 
         # Eigenvalues of the covariance operator
-        eig_v = [1/(precision.subs(f, e).doit()/e).simplify()**alpha
+        self.eig_v = [1/(precision.subs(f, e).doit()/e).simplify()**alpha
                  for e in eig_f]
 
         grid = np.linspace(0, 1, K + 2)[1:-1]
@@ -46,7 +46,7 @@ class ForwardDarcy():
         self.x_obs, self.y_obs = x_obs.reshape(K*K), y_obs.reshape(K*K)
 
         # Basis_functions
-        self.functions = [f*np.sqrt(float(v)) for f, v in zip(eig_f, eig_v)]
+        self.functions = [f*np.sqrt(float(v)) for f, v in zip(eig_f, self.eig_v)]
 
         # --- THIS PART USED TO NOT BE PARALELLIZABLE --- #
         # Create mesh and define function space
@@ -97,13 +97,13 @@ class ForwardDarcy():
 
 # Test code {{{1
 # ==============
-if __name__ == "__main__":
-    G = ForwardDarcy(4, 10)
-    u_truth = np.random.randn(len(G.indices))
-    solution = G(u_truth, return_sol=True)
-    p = fen.plot(solution)
-    plt.colorbar(p)
-    plt.show()
+# if __name__ == "__main__":
+#     G = ForwardDarcy(4, 10)
+#     u_truth = np.random.randn(len(G.indices))
+#     solution = G(u_truth, return_sol=True)
+#     p = fen.plot(solution)
+#     plt.colorbar(p)
+#     plt.show()
 
 # Parameters of the inverse problem {{{1
 # ======================================
@@ -112,6 +112,7 @@ if __name__ == "__main__":
 γ, σ = .01, 1
 
 # Initialize forward model
+# dx, Kx = 3, 10
 dx, Kx = 6, 10
 G = ForwardDarcy(dx, Kx)
 
@@ -121,7 +122,7 @@ u = σ*np.random.randn(len(G.indices))
 # Forward model
 forward = G.__call__
 
-# For appendix results
+# For non-extended state space / no model misspecification
 u[9:] = 0
 
 # Observation without noise
@@ -151,7 +152,7 @@ y = y + rtΓ.dot(np.random.randn(K))
 ip = lib_inverse_problem.InverseProblem(forward, Γ, Σ, y, unknown=u)
 
 # Plotters {{{1
-# ==========
+# =============
 
 
 class MainModesPlotter(lib_plotters.MainModesPlotter):
