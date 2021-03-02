@@ -1,6 +1,11 @@
 module Cbs
+import LinearAlgebra
+import QuadGK
 import Random
-export Config, step
+import SpecialFunctions
+import Statistics
+
+export Config, step, proba_further
 
 struct Config
     alpha::Float64
@@ -44,7 +49,9 @@ function step(objective, config, ensembles)
     fensembles = zeros(J)
     for i in 1:length(fensembles)
         fensembles[i] = objective(ensembles[:, i])
+        print(".")
     end
+    println("")
 
     fensembles = fensembles .- minimum(fensembles)
     beta = adaptive ? find_beta(fensembles, ess) : config.beta
@@ -61,4 +68,17 @@ function step(objective, config, ensembles)
     coeff_noise = real(coeff_noise)
     new_ensembles = mean .+ alpha.*diff .+ coeff_noise*Random.randn(d, J)
 end
+
+function proba_further(ensembles, u)
+    mean = Statistics.mean(ensembles, dims=2)
+    cov = Statistics.cov(ensembles, dims=2)
+    inv_cov = LinearAlgebra.inv(cov)
+    weighted_distance = sqrt((u - mean)' * (inv_cov * (u - mean)))[1]
+    d = length(mean)
+    factor = 2 / 2^(d/2) / SpecialFunctions.gamma(d/2)
+    integral = QuadGK.quadgk(z -> exp(-z^2/2) * z^(d-1), 0, weighted_distance)[1];
+    proba_ball = factor*integral
+    return 1 - proba_ball
+end
+
 end

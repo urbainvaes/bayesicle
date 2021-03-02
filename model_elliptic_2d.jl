@@ -86,7 +86,6 @@ end
 
 obs_nodes = get_obs_nodes()
 function forward(u)
-    print(".")
     if length(u) != length(indices)
         println("Wrong input!")
     end
