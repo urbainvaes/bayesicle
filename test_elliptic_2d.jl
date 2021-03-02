@@ -2,6 +2,7 @@ import LinearAlgebra
 import Random
 import Statistics
 import DelimitedFiles
+using Distributed
 
 include("solver_cbs.jl")
 include("model_elliptic_2d.jl")
@@ -34,8 +35,9 @@ end
 DelimitedFiles.writedlm("$datadir/utruth.txt", utruth);
 DelimitedFiles.writedlm("$datadir/ensemble-0.txt", ensembles);
 
-distance, spread, iter = 10, 1, 0
-while spread > 1e-12
+niter = 100
+for iter in 0:niter-1
+    global ensembles
     mean = Statistics.mean(ensembles, dims=2)
     cov = Statistics.cov(ensembles, dims=2)
     spread = sqrt(la.norm(cov, 2))

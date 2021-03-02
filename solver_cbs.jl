@@ -4,6 +4,8 @@ import QuadGK
 import Random
 import SpecialFunctions
 import Statistics
+using SharedArrays
+using Distributed
 
 export Config, step, proba_further
 

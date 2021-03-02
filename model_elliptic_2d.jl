@@ -32,6 +32,7 @@ utruth = zeros(d) .+ 1.
 rhs(x) = 50
 domain = (0,1,0,1)
 partition = (100,100)
+# partition = (20,20)
 model = CartesianDiscreteModel(domain,partition)
 
 order = 1
