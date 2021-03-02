@@ -25,6 +25,7 @@ N = 4
 d = N**2
 indices = [(m, n) for m in range(0, N) for n in range(0, N)]
 indices.sort(key=lambda i: (max(i), sum(i), i[0]))
+utruth = np.loadtxt(data_dir + "/utruth.txt")
 
 for i, f in enumerate(files):
     print(i)
@@ -36,7 +37,8 @@ for i, f in enumerate(files):
     ax.set_xticklabels((str(i) for i in indices))
     for i, u_i in enumerate(ensembles):
         ax.plot(range(d), u_i, '.', ms=10)
-    ax.plot(range(d), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)
+    # ax.plot(range(d), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)
+    ax.plot(range(d), utruth, 'kx', ms=20, mew=5)
     for i in range(d):
         ens = ensembles[:, i]
         mean_dir = np.mean(ens)
