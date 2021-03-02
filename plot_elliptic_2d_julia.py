@@ -35,6 +35,7 @@ for i, f in enumerate(files):
     ax.clear()
     ax.set_xticks(np.arange(len(indices)))
     ax.set_xticklabels((str(i) for i in indices))
+    ax.set_title(f"Iteration {i}")
     for i, u_i in enumerate(ensembles):
         ax.plot(range(d), u_i, '.', ms=10)
     # ax.plot(range(d), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)

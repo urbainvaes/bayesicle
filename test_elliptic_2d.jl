@@ -24,7 +24,13 @@ config = Cbs.Config(alpha, beta, opti, adaptive, ess)
 datadir = "data_julia/cbs/model_elliptic_2d"
 run(`mkdir -p "$datadir"`);
 
-ensembles = (J = 512; 3*Random.randn(d, J))
+iter = 0
+if iter > 0
+    ensembles = DelimitedFiles.readdlm("$datadir/ensemble-$iter.txt");
+else
+    ensembles = (J = 512; 3*Random.randn(d, J))
+end
+
 DelimitedFiles.writedlm("$datadir/utruth.txt", utruth);
 DelimitedFiles.writedlm("$datadir/ensemble-0.txt", ensembles);
 
