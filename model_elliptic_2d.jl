@@ -7,9 +7,9 @@ la = LinearAlgebra
 
 export utruth, least_squares, d
 
-N = 2
+N = 3
 indices = [(m, n) for m in 0:N for n in 0:N];
-indices = sort(indices, by=maximum)
+indices = sort(indices, by=x->(maximum(x), sum(x), x[1]))
 
 function assemble_diffusivity(u)
     # Eigenvalues of the covariance operator

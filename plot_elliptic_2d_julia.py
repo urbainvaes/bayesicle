@@ -21,9 +21,10 @@ files.sort(key=lambda f:
            int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
 
 fig, ax = plt.subplots()
-N = 3
+N = 4
 d = N**2
 indices = [(m, n) for m in range(0, N) for n in range(0, N)]
+indices.sort(key=lambda i: (max(i), sum(i), i[0]))
 
 for i, f in enumerate(files):
     print(i)
