@@ -1,4 +1,7 @@
 /__pycache__
-/data
+/data*
+/videos
 /tags
 /figures
+/*.pdf
+/*.webm
