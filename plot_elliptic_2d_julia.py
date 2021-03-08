@@ -55,11 +55,10 @@ def update(i):
 update(len(files) - 1)
 plt.savefig("posterior_cbs.pdf")
 
-
-# animate = animation.FuncAnimation
-# anim = animate(fig, update, len(files), repeat=False)
-# writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
-# anim.save(f'elliptic.webm', writer=writer, dpi=500)
+animate = animation.FuncAnimation
+anim = animate(fig, update, len(files), repeat=False)
+writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
+anim.save(f'elliptic_new.webm', writer=writer, dpi=500)
 
 # Plot (Optimization)
 x, y = sym.symbols('x[0], x[1]', real=True, positive=True)

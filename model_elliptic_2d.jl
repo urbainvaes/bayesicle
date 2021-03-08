@@ -1,13 +1,16 @@
+include("lib_inverse_problem.jl")
+
 module ModelElliptic2d
 
 using Gridap
+import ..Ip
 import Random
 import LinearAlgebra
 la = LinearAlgebra
 
-export utruth, least_squares, d
+export utruth, least_squares, d, y, noise_cov, prior_cov
 
-N = 3
+N = 1
 indices = [(m, n) for m in 0:N for n in 0:N];
 indices = sort(indices, by=x->(maximum(x), sum(x), x[1]))
 
@@ -31,8 +34,8 @@ utruth = zeros(d) .+ 1.
 
 rhs(x) = 50
 domain = (0,1,0,1)
-partition = (100,100)
-# partition = (20,20)
+# partition = (100,100)
+partition = (20,20)
 model = CartesianDiscreteModel(domain,partition)
 
 order = 1
@@ -114,11 +117,9 @@ rtΓ = la.diagm(γ .+ zeros(K))
 # Noisy observation
 y = y + rtΓ*randn(K)
 
-function least_squares(u)
-    invΣ = la.diagm(1/σ^2 .+ zeros(d))
-    invΓ = la.diagm(1/γ^2 .+ zeros(K))
-    misfit = y - forward(u)
-    return 1/2 * (misfit' * (invΓ*misfit) + u' * (invΣ*u))
-end
+# Covariance matrices
+noise_cov = la.diagm(γ^2 .+ zeros(K))
+prior_cov = la.diagm(σ^2 .+ zeros(d))
 
+ip = Ip.InverseProblem(forward, y, noise_cov, prior_cov)
 end
