@@ -6,6 +6,7 @@ import scipy.stats
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import array_to_latex as a2l
 
 matplotlib.rc('font', size=20)
 matplotlib.rc('font', family='serif')
@@ -28,6 +29,12 @@ files_eks.sort(key=lambda f:
                int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
 
 utruth = np.loadtxt(data_dir + "/utruth.txt")
+umap = np.mean(np.loadtxt(files[-1]), axis=1)
+umap_eks = np.mean(np.loadtxt(files_eks[-1]), axis=1)
+
+a2l.to_ltx(utruth, frmt = '{:6.2f}', arraytype = 'array')
+a2l.to_ltx(umap, frmt = '{:6.2f}', arraytype = 'array')
+a2l.to_ltx(umap_eks, frmt = '{:6.2f}', arraytype = 'array')
 
 fig, ax = plt.subplots()
 d = len(utruth)
@@ -45,16 +52,16 @@ def update(index):
     ax.set_xticklabels((str(i) for i in indices))
     ax.set_title(f"Iteration {iteration}")
     for i, u_i in enumerate(ensembles):
-        ax.plot(range(d), u_i, '.', color='blue', ms=10)
+        ax.plot(range(d), u_i, '.', color='blue', ms=5)
     # ax.plot(range(d), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)
-    ax.plot(range(d), utruth, 'kx', ms=20, mew=5)
     for i in range(d):
         ens = ensembles[:, i]
         mean_dir = np.mean(ens)
         std_dir = np.std(ens)
         y_plot = np.linspace(mean_dir - 4*std_dir, mean_dir + 4*std_dir)
         x_plot = (1/2) * np.exp(-(y_plot - mean_dir)**2/(2*std_dir**2))
-        ax.plot(i + x_plot, y_plot, c='blue')
+        kwarg = {'label': "CBS"} if i == 0 else {}
+        ax.plot(i + x_plot, y_plot, c='blue', **kwarg)
 
     f = files_eks[index]
     ensembles = np.loadtxt(f).T
@@ -62,9 +69,8 @@ def update(index):
     ax.set_xticks(np.arange(len(indices)))
     ax.set_xticklabels((str(i) for i in indices))
     for i, u_i in enumerate(ensembles):
-        ax.plot(range(d), u_i, '.', color='orange', ms=10)
+        ax.plot(np.arange(d) - .1, u_i, '.', color='orange', ms=5)
     # ax.plot(range(d), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)
-    ax.plot(range(d), utruth, 'kx', ms=20, mew=5)
     for i in range(d):
         ens = ensembles[:, i]
         mean_dir = np.mean(ens)
@@ -73,14 +79,20 @@ def update(index):
         kernel = scipy.stats.gaussian_kde(ens)
         x_plot = kernel([y_plot]).T
         x_plot = (1/2) * x_plot / np.max(x_plot)
-        ax.plot(i + x_plot, y_plot, c='orange')
+        kwarg = {'label': "EKS"} if i == 0 else {}
+        ax.plot(i + x_plot, y_plot, '--', c='orange', **kwarg)
 
+    ax.plot(range(d), utruth, 'kx', ms=20, mew=5, label="Truth")
+    ax.plot(range(d), umap, '+', color='darkgreen', ms=20, mew=5, label="MAP CBS")
+    ax.plot(range(d), umap_eks, '.', color="red", ms=10, mew=5, label="MAP EKI")
+
+    plt.legend()
     plt.draw()
     plt.pause(.1)
 
 update(100)
-plt.show()
-plt.savefig("posterior_cbs.pdf")
+# plt.show()
+plt.savefig("posterior_cbs_elliptic2d.pdf")
 
 # animate = animation.FuncAnimation
 # anim = animate(fig, update, len(files), repeat=False)
