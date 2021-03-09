@@ -1,16 +1,16 @@
-include("lib_inverse_problem.jl")
 
 module ModelElliptic2d
 
 using Gridap
-import ..Ip
 import Random
 import LinearAlgebra
 la = LinearAlgebra
 
+include("lib_inverse_problem.jl")
 export utruth, least_squares, d, y, noise_cov, prior_cov
 
-N = 1
+N = 3
+# N = 1
 indices = [(m, n) for m in 0:N for n in 0:N];
 indices = sort(indices, by=x->(maximum(x), sum(x), x[1]))
 
@@ -34,8 +34,8 @@ utruth = zeros(d) .+ 1.
 
 rhs(x) = 50
 domain = (0,1,0,1)
-# partition = (100,100)
-partition = (20,20)
+partition = (100,100)
+# partition = (20,20)
 model = CartesianDiscreteModel(domain,partition)
 
 order = 1

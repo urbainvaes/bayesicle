@@ -2,6 +2,7 @@ import re
 import glob
 import numpy as np
 import sympy as sym
+import scipy.stats
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -15,31 +16,36 @@ matplotlib.rc('figure.subplot', hspace=.3)
 
 # Directory of the data
 data_dir = "data_julia/cbs/model_elliptic_2d/"
+data_dir_eks = "data_julia/eks/model_elliptic_2d/"
 
 
 files = glob.glob(data_dir + "/ensemble-*.txt")
 files.sort(key=lambda f:
            int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
 
-fig, ax = plt.subplots()
-N = 4
-d = N**2
-indices = [(m, n) for m in range(0, N) for n in range(0, N)]
-indices.sort(key=lambda i: (max(i), sum(i), i[0]))
+files_eks = glob.glob(data_dir_eks + "/ensemble-*.txt")
+files_eks.sort(key=lambda f:
+               int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
+
 utruth = np.loadtxt(data_dir + "/utruth.txt")
 
-def update(i):
-    print(i)
-    f = files[i]
+fig, ax = plt.subplots()
+d = len(utruth)
+N = int(np.sqrt(d))
+indices = [(m, n) for m in range(0, N) for n in range(0, N)]
+indices.sort(key=lambda i: (max(i), sum(i), i[0]))
+
+def update(index):
+    f = files[index]
     iteration = re.search(r"ensemble-([0-9]*).txt", f).group(1)
     ensembles = np.loadtxt(f).T
 
     ax.clear()
     ax.set_xticks(np.arange(len(indices)))
     ax.set_xticklabels((str(i) for i in indices))
-    ax.set_title(f"Iteration {i}")
+    ax.set_title(f"Iteration {iteration}")
     for i, u_i in enumerate(ensembles):
-        ax.plot(range(d), u_i, '.', ms=10)
+        ax.plot(range(d), u_i, '.', color='blue', ms=10)
     # ax.plot(range(d), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)
     ax.plot(range(d), utruth, 'kx', ms=20, mew=5)
     for i in range(d):
@@ -48,17 +54,39 @@ def update(i):
         std_dir = np.std(ens)
         y_plot = np.linspace(mean_dir - 4*std_dir, mean_dir + 4*std_dir)
         x_plot = (1/2) * np.exp(-(y_plot - mean_dir)**2/(2*std_dir**2))
-        ax.plot(i + x_plot, y_plot, c='gray')
-    # plt.draw()
-    # plt.pause(.1)
+        ax.plot(i + x_plot, y_plot, c='blue')
 
-update(len(files) - 1)
+    f = files_eks[index]
+    ensembles = np.loadtxt(f).T
+
+    ax.set_xticks(np.arange(len(indices)))
+    ax.set_xticklabels((str(i) for i in indices))
+    for i, u_i in enumerate(ensembles):
+        ax.plot(range(d), u_i, '.', color='orange', ms=10)
+    # ax.plot(range(d), np.mean(ensembles, axis=0), 'bx', ms=20, mew=5)
+    ax.plot(range(d), utruth, 'kx', ms=20, mew=5)
+    for i in range(d):
+        ens = ensembles[:, i]
+        mean_dir = np.mean(ens)
+        std_dir = np.std(ens)
+        y_plot = np.linspace(mean_dir - 4*std_dir, mean_dir + 4*std_dir)
+        kernel = scipy.stats.gaussian_kde(ens)
+        x_plot = kernel([y_plot]).T
+        x_plot = (1/2) * x_plot / np.max(x_plot)
+        ax.plot(i + x_plot, y_plot, c='orange')
+
+    plt.draw()
+    plt.pause(.1)
+
+update(100)
+plt.show()
 plt.savefig("posterior_cbs.pdf")
 
-animate = animation.FuncAnimation
-anim = animate(fig, update, len(files), repeat=False)
-writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
-anim.save(f'elliptic_new.webm', writer=writer, dpi=500)
+# animate = animation.FuncAnimation
+# anim = animate(fig, update, len(files), repeat=False)
+# writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
+# plt.show()
+# anim.save(f'elliptic_new.webm', writer=writer, dpi=500)
 
 # Plot (Optimization)
 x, y = sym.symbols('x[0], x[1]', real=True, positive=True)

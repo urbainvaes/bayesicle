@@ -34,10 +34,10 @@ function step(ip, config, ensembles)
     diff_data = fensembles .- ip.observation
     diff_mean_forward = fensembles .- mean_fensembles
     diff_mean = ensembles .- mean_ensembles
-    coeffs = diff_mean_forward' * (ip.inv_noise_cov * diff_data)
+    coeffs = (1/J) * diff_mean_forward' * (ip.inv_noise_cov * diff_data)
     drifts = - ensembles * coeffs
     if config.reg
-        drifts +=-  cov_theta * ip.inv_prior_cov * ensembles
+        drifts += - cov_theta * ip.inv_prior_cov * ensembles
     end
 
     effective_dt = config.dt
@@ -50,9 +50,8 @@ function step(ip, config, ensembles)
 
     new_ensembles = ensembles + effective_dt*drifts
     if !config.opti
-        sqrt_cov_theta = sqrt(cov_theta)
-        dw = np.sqrt(effective_dt) * Random.randn(d, J)
-        new_ensembles += sqrtCtheta * dw
+        dw = sqrt(effective_dt) * Random.randn(d, J)
+        new_ensembles += sqrt(2*cov_theta) * dw
     end
 
     return new_ensembles

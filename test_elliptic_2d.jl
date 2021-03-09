@@ -28,7 +28,7 @@ Random.seed!(0);
 if solver == "cbs"
     alpha = 0
     beta = 1
-    opti = true
+    opti = false
     adaptive = true
     ess = 1/2.
     config = Cbs.Config(alpha, beta, opti, adaptive, ess)
@@ -44,25 +44,26 @@ end
 datadir = "data_julia/$solver/model_$model"
 run(`mkdir -p "$datadir"`);
 
-init_iter = 0
+init_iter = 100
 if init_iter > 0
     ensembles = DelimitedFiles.readdlm("$datadir/ensemble-$init_iter.txt");
 else
-    ensembles = (J = 64; 3*Random.randn(ip.d, J))
+    ensembles = (J = 512; 3*Random.randn(ip.d, J))
     DelimitedFiles.writedlm("$datadir/ensemble-0.txt", ensembles);
 end
 
 DelimitedFiles.writedlm("$datadir/utruth.txt", Model.utruth);
 
 niter = 100
-for iter in init_iter:init_iter+niter-1
+for iter in init_iter+1:init_iter+niter
     global ensembles
     mean = Statistics.mean(ensembles, dims=2)
     cov = Statistics.cov(ensembles, dims=2)
     spread = sqrt(la.norm(cov, 2))
-    ensembles = Solver.step(ip, config, ensembles); iter += 1
     distance = la.norm(mean - Model.utruth)
     proba_truth = Ip.proba_further(ensembles, Model.utruth)
     println("Spread = $spread, Error=$distance, Proba = $proba_truth")
+
+    ensembles = Solver.step(ip, config, ensembles);
     DelimitedFiles.writedlm("$datadir/ensemble-$iter.txt", ensembles);
 end

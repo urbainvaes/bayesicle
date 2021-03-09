@@ -1,8 +1,6 @@
-include("lib_inverse_problem.jl")
-
 module Cbs
 import Random
-import ..Ip
+include("lib_inverse_problem.jl")
 
 export Config, step, proba_further
 
