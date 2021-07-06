@@ -26,7 +26,7 @@ function step(ip, config, ensembles)
     mean_ensembles = Statistics.mean(ensembles, dims=2)
     mean_fensembles = Statistics.mean(fensembles, dims=2)
 
-    if config.opti || config.reg
+    if !config.opti || config.reg
         cov_theta = Statistics.cov(ensembles, dims=2)
     end
 
@@ -42,6 +42,7 @@ function step(ip, config, ensembles)
 
     effective_dt = config.dt
     if config.adaptive
+        # !!! This is different from Python implementation !!!
         norm_mat_drift = la.norm(coeffs, 2)
         effective_dt = config.dt/(config.dt/config.dtmax + norm_mat_drift)
         println("Norm of drift: $norm_mat_drift")
