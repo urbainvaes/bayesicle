@@ -19,9 +19,9 @@ function step(ip, config, ensembles)
     fensembles = zeros(K, J)
     for (i, e) in enumerate(eachcol(ensembles))
         fensembles[:, i] = ip.forward(e)
-        print(".")
+        # print(".")
     end
-    println("")
+    # println("")
 
     mean_ensembles = Statistics.mean(ensembles, dims=2)
     mean_fensembles = Statistics.mean(fensembles, dims=2)
@@ -52,7 +52,7 @@ function step(ip, config, ensembles)
 
     new_ensembles = ensembles + effective_dt*drifts
     if !config.opti
-        dw = sqrt(effective_dt) * Random.randn(d, J)
+        dw = sqrt(effective_dt) * Random.randn(J, J)
         new_ensembles += sqrt(2) * sqrt_cov_theta * dw
     end
 
