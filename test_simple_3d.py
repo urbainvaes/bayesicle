@@ -21,48 +21,17 @@ plotter = m.MainModesPlotter(m.ip, show_weights=True, cutoff=10000,
 precond_vec = np.zeros(m.ip.d)
 precond_mat = np.eye(m.ip.d)
 
-preconditioning = False
+preconditioning = True
 if preconditioning:
 
-    precond_vec_file = lib_misc.data_root + "/precond_vec.npy"
-    precond_mat_file = lib_misc.data_root + "/precond_mat.npy"
+    precond_vec_file = "data_julia/precond_vec.txt"
+    precond_mat_file = "data_julia/precond_mat.txt"
 
     if os.path.exists(precond_vec_file):
-        precond_vec = np.load(precond_vec_file)
-        precond_mat = np.load(precond_mat_file)
+        precond_vec = np.loadtxt(precond_vec_file)
+        precond_mat = np.loadtxt(precond_mat_file)
 
-    else:
-
-        # Number of particles
-        J = 1000
-
-        solver = solvers.EksSolver(
-            dt=.5,
-            reg=False,
-            noise=True,
-            parallel=True,
-            adaptive=True,
-            dirname=m.__name__)
-
-        # Initial parameters
-        ensembles = np.random.randn(J, m.ip.d)
-
-        n_iter_precond = 1000
-        for i in range(n_iter_precond):
-            data = solver.step(m.ip, ensembles,
-                               filename="iteration-{:04d}.npy".format(i))
-            ensembles = data.new_ensembles
-            plotter.plot(i, data._asdict())
-            print(np.mean(ensembles, axis=0))
-            if i % 100 == 0:
-                plt.pause(1)
-                plt.draw()
-
-        precond_vec = np.mean(ensembles, axis=0)
-        precond_mat = la.sqrtm(np.cov(ensembles.T))
-
-        np.save(precond_vec_file, precond_vec)
-        np.save(precond_mat_file, precond_mat)
+precond_mat = la.sqrtm(precond_mat)
 
 # MULTISCALE METHOD {{{1
 # Test MD solver

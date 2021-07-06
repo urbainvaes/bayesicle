@@ -13,8 +13,12 @@ include("solver_pCN.jl")
 include("model_elliptic_2d.jl")
 
 solver = "multiscale"
-model = "elliptic_2d"
 Solver = Multiscale
+
+solver = "pCN"
+Solver = pCN
+
+model = "elliptic_2d"
 Model = ModelElliptic2d
 
 datadir = "data_julia/$solver/model_$model"
@@ -61,14 +65,17 @@ ftheta = -1
 
 niter = 20000
 for iter in 1:niter
-    # Multiscale
-    global ensembles, theta, xis
 
-    # pCN
-    global ftheta
+    if solver == "multiscale"
+        global ensembles, theta, xis
+        theta, xis = Solver.step(ip, config, theta, xis)
+    end
 
-    # theta, xis = Solver.step(ip, config, theta, xis)
-    accept, theta, ftheta = pCN.step(ip, config_pCN, theta, ftheta)
+    if solver == "pCN"
+        global ftheta
+        accept, theta, ftheta = pCN.step(ip, config_pCN, theta, ftheta)
+    end
+
     ensembles = [ensembles theta]
     distance = la.norm(theta - Model.utruth)
     proba_truth = Ip.proba_further(ensembles, Model.utruth)
