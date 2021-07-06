@@ -38,8 +38,11 @@ end
 function proba_further(ensembles, u)
     mean = Statistics.mean(ensembles, dims=2)
     cov = Statistics.cov(ensembles, dims=2)
-    inv_cov = LinearAlgebra.inv(cov)
-    weighted_distance = sqrt((u - mean)' * (inv_cov * (u - mean)))[1]
+    weighted_distance = Inf
+    if size(ensembles)[2] > size(cov)[1]
+        inv_cov = LinearAlgebra.inv(cov)
+        weighted_distance = real(weighted_distance)
+    end
     d = length(mean)
     factor = 2 / 2^(d/2) / SpecialFunctions.gamma(d/2)
     integral = QuadGK.quadgk(z -> exp(-z^2/2) * z^(d-1), 0, weighted_distance)[1];

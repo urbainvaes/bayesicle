@@ -4,6 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import lib_inverse_problem
 import lib_opti_problem
+import math
 
 # cmap = 'spring'
 # cmap = 'gray_r'
@@ -151,10 +152,12 @@ class TwoDimPlotter:
         self.Ly = config.get('Ly', 1.5)
         x_plot = self.argmin[0] + self.Lx*np.linspace(-1, 1, n_grid)
         y_plot = self.argmin[1] + self.Ly*np.linspace(-1, 1, n_grid)
-        self.ax.plot(ip.argmin[0], ip.argmin[1], 'kx', ms=20, mew=5)
+        # self.ax.plot(ip.argmin[0], ip.argmin[1], 'kx', ms=20, mew=5)
+        self.ax.set_xlim(-4, -1)
+        self.ax.set_ylim(102, 107)
         # self.ax.set_xlabel('$x$')
         # self.ax.set_ylabel('$y$')
-        self.mean = self.ax.plot([], [], 'rx', ms=20, mew=5)
+        # self.mean = self.ax.plot([], [], 'x', color='violet', ms=20, mew=5)
         if not config.get('opti', False):
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = (1/ip.normalization()) * ip.posterior(X, Y)
@@ -171,12 +174,12 @@ class TwoDimPlotter:
             X, Y = np.meshgrid(x_plot, y_plot)
             Z = ip.least_squares_array(X, Y)
             if isinstance(ip, lib_opti_problem.OptimizationProblem):
-                cont = self.ax.contourf(X, Y, Z, levels=100, cmap='terrain')
+                cont = self.ax.contourf(X, Y, Z, levels=100, cmap='rainbow')
                 # self.ax.contour(X, Y, Z, levels=20, colors='black')
                 # self.fig.colorbar(cont, orientation="horizontal")
-                # self.fig.colorbar(cont)
+                self.fig.colorbar(cont)
             else:
-                cont = self.ax.contour(X, Y, -np.log(Z), levels=100, cmap='viridis')
+                cont = self.ax.contour(X, Y, -np.log(Z), levels=200, cmap='rainbow')
                 self.fig.colorbar(cont)
             constraint = None
             if ip.eq_constraint is not None:
@@ -190,7 +193,7 @@ class TwoDimPlotter:
         if config.get('show_weights', True):
             kwargs = {'cmap': cmap}
         else:
-            kwargs = {'c': 'red', 's': 30, 'edgecolors': 'black'}
+            kwargs = {'c': 'black', 's': 30, 'edgecolors': 'black'}
         self.scatter = self.ax.scatter([], [], **kwargs)
         # cbar = self.fig.colorbar(self.scatter)
         # cbar.set_ticks([])
@@ -223,21 +226,25 @@ class TwoDimPlotter:
         ymax = max(self.argmin[1] + self.Ly, np.max(y_plot))
         delta_x, delta_y = xmax - xmin, ymax - ymin
         if self.config.get('adapt_size', False):
-            self.ax.set_xlim(xmin - .1*delta_x, xmax + .1*delta_x)
-            self.ax.set_ylim(ymin - .1*delta_y, ymax + .1*delta_y)
+            min_step_x = 1
+            min_step_y = 1
+            # self.ax.set_xlim(math.floor(xmin - .1*delta_x), math.ceil(xmax + .1*delta_x))
+            # self.ax.set_ylim(math.floor(ymin - .1*delta_y), math.ceil(ymax + .1*delta_y))
+            self.ax.set_xlim(-4, -1)
+            self.ax.set_ylim(102, 107)
         if data['solver'] == 'cbs':
             # xmean = np.sum(data['weights']*x_plot)
             # ymean = np.sum(data['weights']*y_plot)
             xmean = np.mean(x_plot)
             ymean = np.mean(y_plot)
-            self.mean[0].set_data([xmean], [ymean])
+            # self.mean[0].set_data([xmean], [ymean])
         if data['solver'] == 'cbs' and self.config.get('show_weights', True):
             # title += r": $\beta = {:.3f}$, ESS = {:.2f}"\
             #          .format(data['beta'], data['ess'])
-            self.scatter.set_array(data['weights'])
+            # self.scatter.set_array(data['weights'])
             sizes = 5 + 40*data['weights']/np.max(data['weights'])
             self.scatter.set_sizes(sizes)
-            self.scatter.set_clim((0, np.max(data['weights'])))
+            # self.scatter.set_clim((0, np.max(data['weights'])))
         if data['solver'] == 'md' and self.config.get('show_weights', True):
             n = len(ensembles)
             self.scatter.set_array(np.arange(n)/n)
