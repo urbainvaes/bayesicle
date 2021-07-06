@@ -136,12 +136,12 @@ class EksSolver:
         # new_ensembles = ensembles - my_dt*drifts \
         #     + (np.sqrt(my_dt) * dW.dot(sqrtCtheta) if self.noise else 0)
 
-        constraint = ensembles[:, 0]**2 + ensembles[:, 1]**2 - (2*2.5**2)
-        constraint = np.reshape(constraint, (len(constraint), 1))
+        # constraint = ensembles[:, 0]**2 + ensembles[:, 1]**2 - (2*2.5**2)
+        # constraint = np.reshape(constraint, (len(constraint), 1))
 
         new_ensembles = ensembles - my_dt*drifts \
             + (np.sqrt(my_dt) * dW.dot(sqrtCtheta) if self.noise else 0)
-        new_ensembles = new_ensembles / (1 + constraint*my_dt/self.constraint_eps)
+        # new_ensembles = new_ensembles / (1 + constraint*my_dt/self.constraint_eps)
 
         # import ipdb; ipdb.set_trace()
         # new_ensembles = np.zeros((J, ip.d))

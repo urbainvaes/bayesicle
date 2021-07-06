@@ -2,7 +2,7 @@ module Cbs
 import Random
 include("lib_inverse_problem.jl")
 
-export Config, step, proba_further
+export Config, step
 
 struct Config
     alpha::Float64
