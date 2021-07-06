@@ -17,7 +17,7 @@ matplotlib.rc('figure.subplot', hspace=.0)
 matplotlib.rc('figure.subplot', wspace=.03)
 
 # Solvers
-α = .5
+α = .8
 solver_cbs = solvers.CbsSolver(
     dt=-np.log(α),
     # frac_min=50/100,
@@ -38,8 +38,11 @@ if __name__ == "__main__":
     J = 1000
 
     # ensembles_x = np.random.randn(J)
-    ensembles_x = np.random.randn(J)
-    ensembles_y = 90 + 20*np.random.rand(J)
+    # ensembles_x = np.random.randn(J)
+    # ensembles_y = 90 + 20*np.random.rand(J)
+
+    ensembles_x = -4 + 3*np.random.rand(J)
+    ensembles_y = 102 + 5*np.random.rand(J)
     ensembles = np.vstack((ensembles_x, ensembles_y)).T
 
     def update(i):
@@ -49,7 +52,7 @@ if __name__ == "__main__":
                                filename="iteration-{:04d}.npy".format(i))
         ensembles = data.new_ensembles
         plotter.plot(i, data._asdict())
-    anim = animation.FuncAnimation(plotter.fig, update, 201, init_func=lambda: None, repeat=False)
-    plt.show()
-    # writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
-    # anim.save(f'{m.__name__}_α={α}.webm', writer=writer, dpi=500)
+    anim = animation.FuncAnimation(plotter.fig, update, 51, init_func=lambda: None, repeat=False)
+    # plt.show()
+    writer = animation.writers['ffmpeg'](fps=2, bitrate=500, codec='libvpx-vp9')
+    anim.save(f'{m.__name__}_α={α}.webm', writer=writer, dpi=500)

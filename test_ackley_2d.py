@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Forward model and solver
-import model_ackley_2d as m
+import model_ackley as m
 import solvers
 
 # Set seed to zero
