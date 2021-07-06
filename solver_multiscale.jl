@@ -18,7 +18,7 @@ struct Config
     precond_mat::Matrix{Float64}
 end
 
-function step(ip, config, theta, xis)
+function step(ip, config, theta, xis, verbose=false)
     d = length(theta)
     K = size(ip.noise_cov)[1]
     J = size(xis)[2]
@@ -30,9 +30,13 @@ function step(ip, config, theta, xis)
     fensembles = zeros(K, J)
     for (i, e) in enumerate(eachcol(thetas))
         fensembles[:, i] = ip.forward(e)
-        print(".")
+        if verbose
+            print(".")
+        end
     end
-    println("")
+    if verbose
+        println("")
+    end
 
     if config.opti || config.reg
         Cxi = (1/J) * xis * xis'
