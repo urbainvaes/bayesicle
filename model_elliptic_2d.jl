@@ -6,7 +6,7 @@ import LinearAlgebra
 la = LinearAlgebra
 
 include("lib_inverse_problem.jl")
-export utruth, least_squares, d, y, noise_cov, prior_cov
+export utruth, d, y, noise_cov, prior_cov
 
 N = 3
 # N = 1
