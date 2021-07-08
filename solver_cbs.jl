@@ -36,7 +36,7 @@ function find_beta(fensembles, ess)
     return β
 end
 
-function step(problem, config, ensembles)
+function step(problem, config, ensembles; verbose=false)
     if occursin("InverseProblem", string(typeof(problem)))
         objective(u) = Ip.reg_least_squares(problem, u)
     else
