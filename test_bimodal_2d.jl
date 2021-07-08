@@ -40,7 +40,7 @@ DelimitedFiles.writedlm("$datadir/all_ensembles.txt", all_ensembles);
 
 sigma = 1e-5
 delta = 1e-5
-dt = .005
+dt = .01
 dtmax = 1
 reg = true
 opti = false
@@ -48,7 +48,7 @@ adaptive = false
 precond_mat = la.diagm(1 .+ zeros(model.ip.d))
 config = Multiscale.Config(sigma, delta, dt, dtmax, reg, opti, adaptive, precond_mat)
 
-J, niter = 8, 10^6
+J, niter = 8, 5*10^5
 theta = zeros(model.ip.d)
 xis = Random.randn(model.ip.d, J)
 all_ensembles = zeros(model.ip.d, niter)
@@ -68,5 +68,5 @@ run(`mkdir -p "$datadir"`);
 DelimitedFiles.writedlm("$datadir/all_ensembles.txt", all_ensembles);
 
 s = sign.(all_ensembles[1, :] - all_ensembles[2, :])
-sum(1 .+ s./2)/niter
+sum(1 .+ s)./2/niter
 sum(abs.(s[2:end] - s[1:end-1]))
