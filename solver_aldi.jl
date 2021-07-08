@@ -12,16 +12,23 @@ struct Config
     adaptive::Bool
 end
 
-function step(ip, config, ensembles)
+function step(ip, config, ensembles; verbose=false)
     d, J = size(ensembles)
     K = size(ip.noise_cov)[1]
+
+    function vprint(arg)
+        if verbose
+            print(arg)
+        end
+    end
+    
 
     fensembles = zeros(K, J)
     for (i, e) in enumerate(eachcol(ensembles))
         fensembles[:, i] = ip.forward(e)
-        # print(".")
+        vprint(".")
     end
-    # println("")
+    vprint("\n")
 
     mean_ensembles = Statistics.mean(ensembles, dims=2)
     mean_fensembles = Statistics.mean(fensembles, dims=2)
