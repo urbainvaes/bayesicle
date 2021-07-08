@@ -22,14 +22,14 @@ y_plot = -4 + 8*np.linspace(0, 1, n_grid)
 X, Y = np.meshgrid(x_plot, y_plot)
 Z = m.ip.least_squares_array(X, Y)
 
-fig, [ax1, ax2, ax3] = plt.subplots(1, 3)
+fig, [ax2, ax3] = plt.subplots(1, 2)
 # ax1.contour(X, Y, Z, levels=100, cmap='viridis')
 # ax2.contour(X, Y, Z, levels=100, cmap='viridis')
 # ax3.contour(X, Y, Z, levels=100, cmap='viridis')
 
 # ax1.plot(data[0], data[1], '.', ms=1)
 
-kernel = scipy.stats.gaussian_kde(data, bw_method=None)
+kernel = scipy.stats.gaussian_kde(data)
 positions = np.vstack([X.ravel(), Y.ravel()])
 Z = np.reshape(kernel(positions).T, X.shape)
 ax2.contourf(X, Y, Z, levels=60, cmap='binary')
