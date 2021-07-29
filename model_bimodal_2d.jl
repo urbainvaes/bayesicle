@@ -18,7 +18,8 @@ noise_cov = la.diagm(1 .+ zeros(K))
 prior_cov = la.diagm(1 .+ zeros(d))
 
 # Observation
-y = [4.2297]
+y = [2]
+# y = [4.2297]
 
 ip = Ip.InverseProblem(forward, y, noise_cov, prior_cov)
 end
