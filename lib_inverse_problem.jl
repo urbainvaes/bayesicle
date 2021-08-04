@@ -39,9 +39,12 @@ function proba_further(ensembles, u)
     mean = Statistics.mean(ensembles, dims=2)
     cov = Statistics.cov(ensembles, dims=2)
     weighted_distance = Inf
-    if size(ensembles)[2] > size(cov)[1]
+    try
         inv_cov = LinearAlgebra.inv(cov)
         weighted_distance = real(weighted_distance)
+    catch e
+        println("proba_further: could not find inverse")
+        weighted_distance = Inf
     end
     d = length(mean)
     factor = 2 / 2^(d/2) / SpecialFunctions.gamma(d/2)

@@ -13,6 +13,10 @@ struct Config
 end
 
 function step(ip, config, ensembles; verbose=false)
+    if la.norm(ensembles - ensembles) != 0.0
+        error("Ensembles contain NaNs!")
+    end
+
     d, J = size(ensembles)
     K = size(ip.noise_cov)[1]
 
@@ -21,7 +25,7 @@ function step(ip, config, ensembles; verbose=false)
             print(arg)
         end
     end
-    
+
 
     fensembles = zeros(K, J)
     for (i, e) in enumerate(eachcol(ensembles))
@@ -51,6 +55,7 @@ function step(ip, config, ensembles; verbose=false)
 
     effective_dt = config.dt
     if config.adaptive
+        println("Adapting")
         norm_mat_drift = la.norm(coeffs, 2)
         effective_dt = config.dt/(config.dt/config.dtmax + norm_mat_drift)
         println("Norm of drift: $norm_mat_drift")

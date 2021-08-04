@@ -16,25 +16,25 @@ matplotlib.rc('savefig', bbox='tight')
 matplotlib.rc('figure.subplot', hspace=.3)
 
 # Directory of the data
-data_dir_cbs = "data_julia/cbs/model_elliptic_2d/"
+data_dir_cbs = "data_cluster/cbs/model_elliptic_2d/"
 data_dir_eks = "data_julia/eks/model_elliptic_2d/"
-data_dir_aldi = "data_julia/aldi_64/model_elliptic_2d/"
+data_dir_aldi = "data_cluster/aldi/model_elliptic_2d/"
 data_dir_aldi = "data_julia/aldi/model_elliptic_2d/"
-data_dir_multiscale = "data_julia/multiscale/model_elliptic_2d/"
+data_dir_multiscale = "data_cluster/multiscale/model_elliptic_2d/"
 data_dir_pCN = "data_julia/pCN/model_elliptic_2d/"
 
 
-files_cbs = glob.glob(data_dir_cbs + "/ensemble-*.txt")
-files_cbs.sort(key=lambda f:
-               int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
+# files_cbs = glob.glob(data_dir_cbs + "/ensemble-*.txt")
+# files_cbs.sort(key=lambda f:
+#                int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
 
-files_eks = glob.glob(data_dir_eks + "/all_ensembles-*.txt")
-files_eks.sort(key=lambda f:
-               int(re.search(r"all_ensembles-([0-9]*).txt", f).group(1)))
+# files_eks = glob.glob(data_dir_eks + "/all_ensembles-*.txt")
+# files_eks.sort(key=lambda f:
+#                int(re.search(r"all_ensembles-([0-9]*).txt", f).group(1)))
 
-files_multiscale = glob.glob(data_dir_multiscale + "/ensemble-*.txt")
-files_multiscale.sort(key=lambda f:
-               int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
+# files_multiscale = glob.glob(data_dir_multiscale + "/ensemble-*.txt")
+# files_multiscale.sort(key=lambda f:
+#                int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
 
 files_pCN = glob.glob(data_dir_pCN + "/ensemble-*.txt")
 files_pCN.sort(key=lambda f:
@@ -44,23 +44,23 @@ files_aldi = glob.glob(data_dir_aldi + "/ensemble-*.txt")
 files_aldi.sort(key=lambda f:
                int(re.search(r"ensemble-([0-9]*).txt", f).group(1)))
 
-utruth = np.loadtxt(data_dir_cbs + "/utruth.txt")
-umap = np.mean(np.loadtxt(files_cbs[-1]), axis=1)
-umap_eks = np.mean(np.loadtxt(files_eks[-1]), axis=1)
+utruth = np.loadtxt(data_dir_aldi + "/utruth.txt")
+# umap = np.mean(np.loadtxt(files_cbs[-1]), axis=1)
+# umap_eks = np.mean(np.loadtxt(files_eks[-1]), axis=1)
 
 a2l.to_ltx(utruth, frmt = '{:6.2f}', arraytype = 'array')
-a2l.to_ltx(umap, frmt = '{:6.2f}', arraytype = 'array')
-a2l.to_ltx(umap_eks, frmt = '{:6.2f}', arraytype = 'array')
+# a2l.to_ltx(umap, frmt = '{:6.2f}', arraytype = 'array')
+# a2l.to_ltx(umap_eks, frmt = '{:6.2f}', arraytype = 'array')
 
 fig, ax = plt.subplots()
-utruth = utruth[0:16]
+utruth = utruth[:16]
 d = len(utruth)
 N = int(np.sqrt(d))
 indices = [(m, n) for m in range(0, N) for n in range(0, N)]
 indices.sort(key=lambda i: (max(i), sum(i), i[0]))
 
 def update(index):
-    f = files_cbs[index]
+    f = files_aldi[index]
     ax.clear()
     iteration = re.search(r"ensemble-([0-9]*).txt", f).group(1)
     ensembles = np.loadtxt(f).T
@@ -100,26 +100,27 @@ def update(index):
     # for i, u_i in enumerate(ensembles):
         # ax.plot(np.arange(d), u_i, '.', ms=5)
 
-    f = files_multiscale[-1]
-    plot_marginals(f, label="Approximate posterior (multiscale)", shape="--",
-                   color="black", plot_points=False, gaussian=False)
+    # f = files_multiscale[-1]
+    # plot_marginals(f, label="Multiscale", shape="--",
+    #                color="black", plot_points=False, gaussian=False)
 
     f = files_pCN[-1]
-    plot_marginals(f, label="Approximate posterior (MCMC)", shape="-",
+    plot_marginals(f, label="MCMC", shape="-.",
                    color="green", plot_points=False, gaussian=False)
 
     f = files_aldi[-1]
     all_ensembles = np.vstack([np.loadtxt(f).T for f in files_aldi])
     J = np.shape(np.loadtxt(files_aldi[0]))[0]
+    # all_ensembles = all_ensembles[100*J:]
     all_ensembles = all_ensembles[100*J:]
 
     argument = all_ensembles
-    plot_marginals(argument, label="Approximate posterior (ALDI)", shape="-",
-                   color="red", plot_points=False, gaussian=False)
+    plot_marginals(argument, label="gfALDI", shape="-",
+                   color="orange", plot_points=False, gaussian=False)
 
-    f = files_cbs[-1]
-    plot_marginals(f, label="CBS", shape="-", color="magenta",
-                   plot_points=False, gaussian=True)
+    # f = files_cbs[-1]
+    # plot_marginals(f, label="CBS", shape="-", color="blue",
+    #                plot_points=False, gaussian=True)
 
     # f = files_eks[-1]
     # plot_marginals(f, label="Approximate posterior (EKS)", shape="-",
@@ -150,6 +151,19 @@ def update(index):
 update(0)
 plt.savefig("posterior_multiscale_elliptic2d.pdf")
 
+# data_mul = np.loadtxt(files_multiscale[-1]).T
+data_pCN = np.loadtxt(files_pCN[-1]).T
+all_ensembles = np.vstack([np.loadtxt(f).T for f in files_aldi])
+J = np.shape(np.loadtxt(files_aldi[0]))[1]
+data_aldi = all_ensembles[100*J:]
+
+fig, ax = plt.subplots()
+c0, c1 = 5, 9
+ax.plot(data_aldi[:,c0], data_aldi[:,c1], '.', label="gfALDI")
+ax.plot(data_pCN [:,c0], data_pCN[:,c1], '.', label="pCN")
+# ax.plot(data_mul[:,c0],  data_mul[:,c1], '.', label="Multiscale")
+plt.legend()
+
 # animate = animation.FuncAnimation
 # anim = animate(fig, update, len(files_cbs), repeat=False)
 # plt.show()
@@ -178,24 +192,55 @@ functions = [f*np.sqrt(float(v)) for f, v in zip(eig_f, eig_v)]
 
 # Assembling diffusivity
 utruth = np.loadtxt(data_dir_cbs + "/utruth.txt")
-uapprox = np.mean(np.loadtxt(files_cbs[-1]), axis=1)
+# uapprox = np.mean(np.loadtxt(files_cbs[-1]), axis=1)
+uapprox = np.loadtxt("data_cluster/multiscale_map.txt").T[-1]
 
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
 
-fig, ax = plt.subplots(1, 2, sharex=True, sharey=True)
 perm_truth = sum([ui*fi for ui, fi in zip(utruth, functions)], 0)
 variables = list(perm_truth.free_symbols)
 variables.sort(key=lambda x: str(x))
-perm_truth = sym.lambdify(variables, perm_truth)
-perm_approx = sum([ui*fi for ui, fi in zip(uapprox, functions)], 0)
-perm_approx = sym.lambdify(variables, perm_approx)
 grid = np.linspace(0, 1, 200)
 X, Y = np.meshgrid(grid, grid)
+
+u_multiscale = np.loadtxt(files_multiscale[-1]).T
+
+def eval_log_permeablitiy(u):
+    perm_approx = sum([ui*fi for ui, fi in zip(u, functions)], 0)
+    perm_approx = sym.lambdify(variables, perm_approx)
+    return perm_approx(X, Y)
+
+evaluations = []
+for i, u in enumerate(u_multiscale):
+    print(i)
+    evaluations.append(eval_log_permeablitiy(u))
+    if i > 2000:
+        break
+perm_var = np.var(np.array(evaluations), axis = 0)
+
+# Observation points
+obs_grid = np.linspace(0, 1, 11)
+xgrid, ygrid = np.meshgrid(obs_grid, obs_grid)
+
+perm_truth = eval_log_permeablitiy(utruth)
+perm_approx = eval_log_permeablitiy(uapprox)
+
+fig, ax = plt.subplots(1, 2, sharex=True, sharey=True)
 ax[0].set_aspect('equal')
 ax[1].set_aspect('equal')
-contourf0 = ax[0].contourf(X, Y, perm_truth(X, Y))
-contourf1 = ax[1].contourf(X, Y, perm_approx(X, Y))
+ax[0].plot(xgrid, ygrid, 'k.')
+contourf0 = ax[0].contourf(X, Y, perm_truth, levels=40)
+ax[1].plot(xgrid, ygrid, 'k.')
+contourf1 = ax[1].contourf(X, Y, perm_approx, levels=40)
+ax[0].set_xlabel('$x_0$')
+ax[1].set_xlabel('$x_0$')
+ax[0].set_ylabel('$x_1$')
+contourf1.set_array(contourf0.get_array)
+fig.colorbar(contourf1, ax=ax, fraction=0.022, pad=.03)
+fig.savefig('log_permeability.pdf')
+plt.show()
+
 # fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 # surf0 = ax.plot_surface(X, Y, np.exp(perm_truth(X, Y)), linewidth=0, antialiased=False, cmap=cm.viridis)
 # plt.savefig("/home/urbain/true.png", bbox_inches="tight", transparent=True)
@@ -203,10 +248,20 @@ contourf1 = ax[1].contourf(X, Y, perm_approx(X, Y))
 # fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 # surf1 = ax.plot_surface(X, Y, np.exp(perm_approx(X, Y)), linewidth=0, antialiased=False, cmap=cm.viridis)
 # plt.savefig("/home/urbain/reconstructed.png", bbox_inches="tight", transparent=True)
-contourf1.set_array(contourf0.get_array)
+
+fig, ax = plt.subplots(1, 1, sharex=True, sharey=True)
+ax.plot(xgrid, ygrid, 'k.')
+ax.set_aspect('equal')
+# ax[1].set_aspect('equal')
+contourf0 = ax.contourf(X, Y, perm_truth - perm_approx)
+# contourf1 = ax[1].contourf(X, Y, np.sqrt(perm_var))
+# contourf1.set_array(contourf0.get_array)
 fig.colorbar(contourf1, ax=ax, fraction=0.022, pad=.03)
-ax[0].set_xlabel('$x_0$')
-ax[1].set_xlabel('$x_0$')
-ax[0].set_ylabel('$x_1$')
-fig.savefig('log_permeability.pdf')
 plt.show()
+
+
+λs = np.asarray(eig_v, dtype=float)
+norm1 = np.linalg.norm(utruth)
+error1 = np.linalg.norm(uapprox - utruth) / norm1
+norm2 = np.linalg.norm(utruth*np.sqrt(λs))
+error2 = np.linalg.norm((uapprox - utruth)*np.sqrt(λs)) / norm2

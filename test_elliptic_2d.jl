@@ -83,9 +83,13 @@ elseif solver == "aldi"
 
     # Calculated based on 100 iterations of gfALDI with adaptive time step
     initial_condition = "data_julia/aldi/model_$model/initial-100.txt"
+    use_initial = false
     if isfile(initial_condition)
-        println("Using existing initial condition")
         ensembles = DelimitedFiles.readdlm(initial_condition)
+        use_initial = size(ensembles, 2) == nparticles
+    end
+    if use_initial
+        println("Using existing initial condition")
     else
         ensembles = Random.randn(Model.ip.d, nparticles)
         DelimitedFiles.writedlm("$datadir/ensemble-0.txt", ensembles);
@@ -112,9 +116,4 @@ for iter in init_iter+1:init_iter+niter
     println("Spread = $spread, Error=$distance, Proba = $proba_truth")
     ensembles = Solver.step(Model.ip, config, ensembles; verbose=true);
     DelimitedFiles.writedlm("$datadir/ensemble-$iter.txt", ensembles);
-    if iter > 0 && iter % 10 == 0
-        global all_ensembles
-        all_ensembles = [all_ensembles ensembles]
-        DelimitedFiles.writedlm("$datadir/all_ensembles-$iter.txt", all_ensembles);
-    end
 end

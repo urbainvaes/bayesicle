@@ -8,8 +8,8 @@ la = LinearAlgebra
 include("lib_inverse_problem.jl")
 export utruth, d, y, noise_cov, prior_cov
 
-N = 7
-# N = 1
+# N = 7
+# N = 3
 indices = [(m, n) for m in 0:N for n in 0:N];
 indices = sort(indices, by=x->(maximum(x), sum(x), x[1]))
 
@@ -48,7 +48,7 @@ dΩ = Measure(Ω,degree)
 
 # Find node indices of observations
 function get_obs_nodes()
-    M = 10
+    M = 4
     grid = 1/M * (1:M-1) |> collect
     xobs = grid * ones(M-1)'
     yobs = ones(M-1)  * grid'
