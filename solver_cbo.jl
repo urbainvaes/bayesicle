@@ -12,7 +12,7 @@ struct Config
     ε::Float64
 end
 
-function step(problem, config, ensembles; 
+function step(problem, config, ensembles;
               eq_constraint=false, ineq_constraint=false, verbose=false)
 
     if occursin("InverseProblem", string(typeof(problem)))
@@ -25,8 +25,8 @@ function step(problem, config, ensembles;
     function extra_objective(x)
         result = 0
         if ! (eq_constraint == false)
-            result += (1/ε) * eq_constraint(x)^2
-        elseif ! (ineq_constraint == false) 
+            result += (1/ε) * abs(eq_constraint(x))
+        elseif ! (ineq_constraint == false)
             val = ineq_constraint(x)
             result += (val < 0) ? 0 : (1/ε) *val
         end

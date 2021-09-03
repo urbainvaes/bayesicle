@@ -12,7 +12,9 @@ struct Config
     adaptive::Bool
 end
 
-function step(ip, config, ensembles)
+function step(ip, config, ensembles;
+              eq_constraint=false, ineq_constraint=false, verbose=false)
+
     d, J = size(ensembles)
     K = size(ip.noise_cov)[1]
 

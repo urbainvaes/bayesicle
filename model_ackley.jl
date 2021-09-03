@@ -3,9 +3,9 @@ module Ackley
 import Random
 import Statistics
 
-shift = 2
-n = 2
-exact = shift * ones(n, 1);
+shift = 2;
+n = 2;
+# exact = shift * ones(n);
 
 function rastrigin(x)
     A = 10
@@ -24,8 +24,9 @@ function ackley(x)
     result = 20 + exp(1) - 20 * exp(-.2*sqrt(1/n*sum(abs2, z))) - exp(1/n*sum(cos.(2π*z)))
 end
 
+radius = 3*sqrt(2)
 function sphere_constraint(x)
-    return sum(x'x) - 1
+    return x'x .- radius^2
 end
 
 end

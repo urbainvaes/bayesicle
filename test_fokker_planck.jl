@@ -37,7 +37,6 @@ niter = 20000
 for iter in 1:niter
     global ensembles
 
-    # sleep(.1)
     ensembles = Solver.step(ip, config, ensembles);
     mean = Statistics.mean(ensembles, dims=2)
     cov = Statistics.cov(ensembles, dims=2)
@@ -51,4 +50,3 @@ for iter in 1:niter
         DelimitedFiles.writedlm("$datadir/ensemble-$iter.txt", ensembles);
     end
 end
-
