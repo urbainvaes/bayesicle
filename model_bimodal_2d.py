@@ -16,7 +16,7 @@ prior_cov = np.diag([1]*d)
 
 # Observation
 y = np.array([2])
-y = np.array([4.2297])
+# y = np.array([4.2297])
 
 ip = lib_inverse_problem.InverseProblem(forward, noise_cov, prior_cov, y)
 Plotter = lib_plotters.TwoDimPlotter
