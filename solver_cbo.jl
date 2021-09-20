@@ -13,7 +13,7 @@ struct Config
 end
 
 function step(problem, config, ensembles;
-              eq_constraint=false, ineq_constraint=false, verbose=false)
+              eq_constraint=nothing, ineq_constraint=nothing, verbose=false)
 
     if occursin("InverseProblem", string(typeof(problem)))
         objective(u) = Ip.reg_least_squares(problem, u)
@@ -24,15 +24,14 @@ function step(problem, config, ensembles;
     ε = config.ε
     function extra_objective(x)
         result = 0
-        if ! (eq_constraint == false)
+        if ! (eq_constraint == nothing)
             result += (1/ε) * abs(eq_constraint(x))
-        elseif ! (ineq_constraint == false)
+        elseif ! (ineq_constraint == nothing)
             val = ineq_constraint(x)
             result += (val < 0) ? 0 : (1/ε) *val
         end
         return result
     end
-
 
     λ = config.λ
     σ = config.σ
