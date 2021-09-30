@@ -18,6 +18,9 @@ struct InverseProblem
     d::Int
     InverseProblem(forward, observation, noise_cov, prior_cov) =
     begin
+        if length(observation) != size(noise_cov)[1]
+            error("Size mismatch between obseravtion and covariance!")
+        end
         inv_noise_cov = la.inv(noise_cov);
         inv_prior_cov = la.inv(prior_cov);
         new(forward, observation, noise_cov, prior_cov, inv_noise_cov,

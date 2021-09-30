@@ -21,9 +21,9 @@ function step(ip, config, ensembles;
     fensembles = zeros(K, J)
     for (i, e) in enumerate(eachcol(ensembles))
         fensembles[:, i] = ip.forward(e)
-        print(".")
+        verbose && print(".")
     end
-    println("")
+    verbose && println("")
 
     mean_ensembles = Statistics.mean(ensembles, dims=2)
     mean_fensembles = Statistics.mean(fensembles, dims=2)

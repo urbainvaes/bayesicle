@@ -29,4 +29,8 @@ function sphere_constraint(x)
     return x'x .- radius^2
 end
 
+function grad_sphere_constraint(x)
+    return x
+end
+
 end

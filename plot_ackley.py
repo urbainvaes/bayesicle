@@ -15,9 +15,8 @@ matplotlib.rc('figure', figsize=(12, 6))
 
 import model_ackley as ackley
 
-epsilons = [2, 1, .5, .25, .125, .0625]
-nparticles = 1000
-data = np.loadtxt("data/limits.txt")
+epsilons = [2., 1., .5, .25, .125, .0625]
+nparticles = 100
 
 for ε in epsilons:
     data = np.loadtxt(f"data/limits-epsilon={ε}-J={nparticles}.txt")
@@ -37,5 +36,4 @@ for ε in epsilons:
         transform=ax.transAxes)
     ax.set_aspect('equal')
     fig.savefig(f"figures/limits-epsilon={ε}-J={nparticles}.pdf", bbox_inches="tight")
-    # plt.show()
-
+    plt.show()
