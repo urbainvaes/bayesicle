@@ -74,6 +74,7 @@ config = Multiscale.Config(sigma, delta, dt, dtmax, reg, opti, adaptive, precond
 beta = .1
 precond_vec = mean_aldi
 precond_mat = 4*cov_aldi
+# precond_mat = diag
 config_pCN = pCN.Config(beta, precond_vec, precond_mat)
 
 # Save truth
@@ -90,6 +91,7 @@ ensembles = theta
 ftheta = -1
 
 niter = 20000
+global naccepts = 0
 for iter in 1:niter
 
     if solver == "multiscale"
@@ -99,8 +101,10 @@ for iter in 1:niter
     end
 
     if solver == "pCN"
-        global ftheta
+        global ftheta, naccepts
         accept, theta, ftheta = pCN.step(ip, config_pCN, theta, ftheta)
+        naccepts += (accept ? 1 : 0)
+        println("$naccepts / $iter")
     end
 
     ensembles = [ensembles theta]

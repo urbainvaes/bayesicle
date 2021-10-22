@@ -46,7 +46,7 @@ for iter in 1:niter
     spread = sqrt(la.norm(cov, 2))
     sum_weights = sum(mean[1:2:end])
     error = la.norm(Model.utruth - mean) / la.norm(Model.utruth)
-    Formatting.printfmt("$iter: Spread: {:.3e}, Sum of weights: {:.3e}, error: {:.3e}\n", 
+    Formatting.printfmt("$iter: Spread: {:.3e}, Sum of weights: {:.3e}, error: {:.3e}\n",
                         spread, sum_weights, error)
     # print(mean)
 
