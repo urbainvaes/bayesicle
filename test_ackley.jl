@@ -20,11 +20,17 @@ writedlm = DelimitedFiles.writedlm
 datadir = "data/"
 run(`mkdir -p $datadir`)
 
-J = 1000
+# ε = .1
+J = 100
 nsimuls = 100
 
-for ν in [10., 1., .1, .01]
-    config = Cbo.Config(β, λ, σ, Δ, ν)
+ν, ε, nsimuls = 1, 1, 1
+νs = [ν]
+
+# νs = [10., 1., .1]
+
+for ν in νs
+    config = Cbo.Config(β, λ, σ, Δ, ν, ε)
     limits = zeros(Ackley.n, nsimuls)
     Random.seed!(0);
     for s in 1:nsimuls
@@ -36,18 +42,20 @@ for ν in [10., 1., .1, .01]
             mean = Statistics.mean(ensembles, dims=2)
             spread = sqrt(sum(abs2, Statistics.cov(ensembles, dims=2)))
             ensembles = Cbo.step(objective, config, ensembles;
-                                 verbose=false, eq_constraint=constraint,
-                                 grad_eq_constraint=nothing)
-                                 # grad_eq_constraint=grad_constraint)
+                                 verbose=false, ineq_constraint=constraint,
+                                 # verbose=false, eq_constraint=constraint,
+                                 # grad_eq_constraint=nothing)
+                                 grad_ineq_constraint=grad_constraint)
             # ensembles = Cbo.step(objective, config, ensembles;
             #                      verbose=false, ineq_constraint=constraint)
-            # println("$niter: Constraint: $(constraint(mean)), Distance: $distance, Spread: $spread")
+            println("$niter: Constraint: $(constraint(mean)), Distance: $distance, Spread: $spread")
             niter += 1
+            writedlm(datadir * "niter=$niter.txt", ensembles)
         end
         println(s, mean, " ", constraint(mean))
         limits[:, s] = mean
     end
 
-    writedlm(datadir * "limits-nu=$ν-J=$J.txt", limits)
+    writedlm(datadir * "limits-nu=$ν-epsilon=$ε-J=$J.txt", limits)
     writedlm(datadir * "limits.txt", limits)
 end

@@ -9,6 +9,7 @@ struct Config
     λ::Float64
     σ::Float64
     Δ::Float64
+    ν::Float64
     ε::Float64
 end
 
@@ -23,14 +24,15 @@ function step(problem, config, ensembles;
         objective = problem
     end
 
+    ν = config.ν
     ε = config.ε
     function extra_objective(x)
         result = 0
         if ! (eq_constraint == nothing)
-            result += (1/ε) * eq_constraint(x)^2
+            result += (1/ν) * eq_constraint(x)^2
         elseif ! (ineq_constraint == nothing)
             val = ineq_constraint(x)
-            result += (val > 0) ? 0 : (1/ε) * val^2
+            result += (val > 0) ? 0 : (1/ν) * val^2
         end
         return result
     end
@@ -65,7 +67,9 @@ function step(problem, config, ensembles;
     if ! (grad_ineq_constraint == nothing)
         for i in 1:length(fensembles)
             # SPECIAL CASE !!!
-            new_ensembles[:, i] = new_ensembles[:, i] / (1 + 4*(Δ/ε)*eq_constraint(ensembles[:, i]))
+            # if ineq_constraint(ensembles[:, i]) < 0
+            #     new_ensembles[:, i] = new_ensembles[:, i] / (1 + 4*(Δ/ε)*ineq_constraint(ensembles[:, i]))
+            # end
             # new_ensembles[:, i] -= (2/ε)*Δ * eq_constraint(ensembles[:, i]) * grad_eq_constraint(ensembles[:, i])
         end
     end
