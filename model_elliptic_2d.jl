@@ -9,7 +9,7 @@ include("lib_inverse_problem.jl")
 export utruth, d, y, noise_cov, prior_cov
 
 # N = 7
-# N = 3
+N = 3
 indices = [(m, n) for m in 0:N for n in 0:N];
 indices = sort(indices, by=x->(maximum(x), sum(x), x[1]))
 

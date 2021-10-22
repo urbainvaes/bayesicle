@@ -47,6 +47,7 @@ function step(ip, config, ensembles;
         # !!! This is different from Python implementation !!!
         norm_mat_drift = la.norm(coeffs, 2)
         effective_dt = config.dt/(config.dt/config.dtmax + norm_mat_drift)
+        # effective_dt = config.dt/norm_mat_drift
         println("Norm of drift: $norm_mat_drift")
         println("New time step: $effective_dt")
     end

@@ -14,17 +14,17 @@ grad_constraint = Ackley.grad_sphere_constraint
 β = 1
 λ = 1
 σ = .7
-Δ = .005
+Δ = .01
 
 writedlm = DelimitedFiles.writedlm
 datadir = "data/"
 run(`mkdir -p $datadir`)
 
-J = 100
+J = 1000
 nsimuls = 100
 
-for ε in [2, 1, .5, .25, .125, .0625]
-    config = Cbo.Config(β, λ, σ, Δ, ε)
+for ν in [10., 1., .1, .01]
+    config = Cbo.Config(β, λ, σ, Δ, ν)
     limits = zeros(Ackley.n, nsimuls)
     Random.seed!(0);
     for s in 1:nsimuls
@@ -37,7 +37,8 @@ for ε in [2, 1, .5, .25, .125, .0625]
             spread = sqrt(sum(abs2, Statistics.cov(ensembles, dims=2)))
             ensembles = Cbo.step(objective, config, ensembles;
                                  verbose=false, eq_constraint=constraint,
-                                 grad_eq_constraint=grad_constraint)
+                                 grad_eq_constraint=nothing)
+                                 # grad_eq_constraint=grad_constraint)
             # ensembles = Cbo.step(objective, config, ensembles;
             #                      verbose=false, ineq_constraint=constraint)
             # println("$niter: Constraint: $(constraint(mean)), Distance: $distance, Spread: $spread")
@@ -47,6 +48,6 @@ for ε in [2, 1, .5, .25, .125, .0625]
         limits[:, s] = mean
     end
 
-    writedlm(datadir * "limits-epsilon=$ε-J=$J.txt", limits)
+    writedlm(datadir * "limits-nu=$ν-J=$J.txt", limits)
     writedlm(datadir * "limits.txt", limits)
 end

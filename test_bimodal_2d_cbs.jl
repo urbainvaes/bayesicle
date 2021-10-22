@@ -20,18 +20,27 @@ adaptive = true
 ess = .5
 config = CbsMetro.Config(alpha, beta, adaptive, adaptive)
 
-J = 5000
+J = 10000
 fensembles = nothing
 ensembles = Random.randn(model.ip.d, J)
 
-niter = 100000
+niter = 1000000
+nburnin = 1000
 datadir = "data_julia/model_bimodal_2d/cbs_metro/"
 run(`mkdir -p "$datadir"`);
+naccepts = 0
+# all_ensembles = zeros(model.ip.d, (niter - nburnin)*J)
 for iter in 1:niter
-    global ensembles
+    global naccepts, ensembles, fensembles
     accept, ensembles, fensembles = CbsMetro.step(model.ip, config, ensembles, fensembles; verbose=false);
+    accept && (naccepts += 1)
     if iter % 1000 == 0
-        println("$iter $accept")
+        println("$iter $naccepts")
         DelimitedFiles.writedlm("$datadir/ensembles-$iter.txt", ensembles);
     end
+    if iter > nburnin
+        # all_ensembles[:,(iter - nburnin - 1)*J+1:(iter-nburnin)*J] = ensembles
+    end
 end
+DelimitedFiles.writedlm("$datadir/all_ensembles.txt", all_ensembles);
+DelimitedFiles.writedlm("$datadir/last_ensemble.txt", ensembles);
