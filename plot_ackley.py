@@ -15,11 +15,12 @@ matplotlib.rc('figure', figsize=(12, 6))
 
 import model_ackley as ackley
 
-epsilons = [2., 1., .5, .25, .125, .0625]
-nparticles = 100
+# νs = [2., 1., .5, .25, .125, .0625]
+νs = [10., 1., .1, .01]
+nparticles = 1000
 
-for ε in epsilons:
-    data = np.loadtxt(f"data/limits-epsilon={ε}-J={nparticles}.txt")
+for ν in νs:
+    data = np.loadtxt(f"data/limits-nu={ν}-J={nparticles}.txt")
     fig, ax = plt.subplots()
     grid = np.arange(-3, 3, .01)
     xgrid, ygrid = ackley.a + grid, ackley.b + grid
@@ -31,9 +32,9 @@ for ε in epsilons:
     ax.set_xlim((xgrid[0], xgrid[-1]))
     ax.set_ylim((ygrid[0], ygrid[-1]))
     props = dict(boxstyle='round', facecolor='cyan', alpha=0.9)
-    ax.text(.02, .98, rf"$\varepsilon={ε}$, $J={nparticles}$", fontsize=18, bbox=props,
+    ax.text(.02, .98, rf"$\varepsilon={ν}$, $J={nparticles}$", fontsize=18, bbox=props,
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes)
     ax.set_aspect('equal')
-    fig.savefig(f"figures/limits-epsilon={ε}-J={nparticles}.pdf", bbox_inches="tight")
+    fig.savefig(f"figures/limits-nu={ν}-J={nparticles}.pdf", bbox_inches="tight")
     plt.show()
