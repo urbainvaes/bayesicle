@@ -13,7 +13,8 @@ struct Config
 end
 
 function step(ip, config, ensembles;
-              eq_constraint=false, ineq_constraint=false, verbose=false)
+              eq_constraint=false, ineq_constraint=false,
+              verbose=false, semi_implicit=false)
 
     d, J = size(ensembles)
     K = size(ip.noise_cov)[1]
@@ -37,7 +38,7 @@ function step(ip, config, ensembles;
     diff_mean_forward = fensembles .- mean_fensembles
     diff_mean = ensembles .- mean_ensembles
     coeffs = (1/J) * diff_mean_forward' * (ip.inv_noise_cov * diff_data)
-    drifts = - ensembles * coeffs
+    drifts = - (ensembles .- mean_ensembles) * coeffs
     if config.reg
         drifts += - cov_theta * ip.inv_prior_cov * ensembles
     end
@@ -50,6 +51,13 @@ function step(ip, config, ensembles;
         # effective_dt = config.dt/norm_mat_drift
         println("Norm of drift: $norm_mat_drift")
         println("New time step: $effective_dt")
+    end
+
+    if semi_implicit && config.opti
+        # return ensembles * la.inv(la.I + effective_dt*coeffs)
+
+        # Better vs roundoff errors
+        return mean_ensembles .+ diff_mean * la.inv(la.I + effective_dt*coeffs)
     end
 
     new_ensembles = ensembles + effective_dt*drifts
